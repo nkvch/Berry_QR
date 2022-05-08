@@ -6,10 +6,7 @@ import Home from '../views/Home';
 import { BottomNavigation, Appbar } from 'react-native-paper';
 import { Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-const SignInRoute = () => <SignIn />;
-
-const HomeRoute = () => <Home />;
+import NewPortion from '../views/NewPortion';
 
 const Wrapper = ({
   navigation,
@@ -26,12 +23,32 @@ const Wrapper = ({
   };
 
   const [index, setIndex] = useState(0);
-
-  const renderScene = BottomNavigation.SceneMap({
-    home: HomeRoute,
-    signin: SignInRoute,
-    scanner: QrScanner,
+  const [props, setProps] = useState({
+    home: {},
+    signin: {},
+    scanner: {},
+    newportion: {},
   });
+
+  const jumpTo = (key, _props) => {
+    const targetScreenIndex = menuItems.findIndex(item => item.key === key);
+
+    setProps(prevProps => ({ ...prevProps, [key]: _props }));
+    setIndex(targetScreenIndex);
+  };
+
+  const renderScene = ({ route }) => {
+    switch (route.key) {
+      case 'home':
+        return <Home jumpTo={jumpTo} {...props.home} />;
+      case 'signin':
+        return <SignIn jumpTo={jumpTo} {...props.signin} />;
+      case 'scanner':
+        return <QrScanner jumpTo={jumpTo} {...props.scanner} />;
+      case 'newportion':
+        return <NewPortion jumpTo={jumpTo} {...props.newportion} />;
+    }
+  }
 
   return (
     <>

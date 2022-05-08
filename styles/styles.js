@@ -80,4 +80,12 @@ export default StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 8,
   },
+  flexColumn: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  mb: num => ({
+    marginBottom: num,
+  }),
 });

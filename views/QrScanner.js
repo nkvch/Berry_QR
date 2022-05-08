@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet, Button } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import styles from '../styles/styles';
+import getLocalDateTime from '../utils/getLocalDateTime';
 
-import NewPortionDialog from './NewPortionDialog';
+import NewPortion from './NewPortion';
 
-function QrScanner() {
+function QrScanner({ jumpTo }) {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [berryId, setBerryId] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -19,11 +18,10 @@ function QrScanner() {
     })();
   }, []);
 
-  const handleBarCodeScanned = ({ type, data }) => {
+  const handleBarCodeScanned = ({ type, data: berryId }) => {
     setScanned(true);
-    setShowForm(true);
     // TODO validate
-    setBerryId(data);
+    jumpTo('newportion', { berryId });
   };
 
   if (hasPermission === null) {
@@ -47,7 +45,6 @@ function QrScanner() {
             />
           )
         }
-        <NewPortionDialog show={showForm} berryId={berryId} dontShow={() => setShowForm(false)}/>
       </View>
       {scanned && <Button title={'Сканировать еще раз'} onPress={() => setScanned(false)} />}
     </View>

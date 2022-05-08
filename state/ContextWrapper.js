@@ -20,6 +20,7 @@ const unauthMenuOptions = [
 const authMenuOptions = [
   { key: 'home', title: 'Домой', icon: 'home' },
   { key: 'scanner', title: 'Сканнер', icon: 'qrcode-scan' },
+  { key: 'newportion', title: 'Новая порция', icon: 'plus'},
 ];
 
 const ContextWrapper = ({ children }) => {

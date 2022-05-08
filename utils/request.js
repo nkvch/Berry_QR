@@ -1,7 +1,7 @@
 //import { API } from '@env';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const apiUrl = 'http://192.168.163.91:3000';
+import { api as apiUrl } from '../api';
 
 const request = async obj => {
   const { url, method, body, searchParams, callback, withFiles } = obj;
@@ -35,6 +35,8 @@ const request = async obj => {
   }
 
   const fetchUrl = apiUrl + '/api' + (urlWithParams || url);
+
+  console.log(fetchUrl);
 
   return fetch(fetchUrl, requestOptions)
     .then(response => response.json())
