@@ -1,5 +1,6 @@
 //import { API } from '@env';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorageLib from '@react-native-async-storage/async-storage';
 
 import { api as apiUrl } from '../api';
 
@@ -22,7 +23,7 @@ const request = async obj => {
     },
   };
 
-  const token = '';// await AsyncStorage.getItem('jwt');
+  const token = await AsyncStorageLib.getItem('jwt');
 
   if (token) {
     requestOptions.headers.Authorization = `Bearer ${token}`;
@@ -35,8 +36,6 @@ const request = async obj => {
   }
 
   const fetchUrl = apiUrl + '/api' + (urlWithParams || url);
-
-  console.log(fetchUrl);
 
   return fetch(fetchUrl, requestOptions)
     .then(response => response.json())

@@ -10,10 +10,9 @@ import { api } from '../api';
 const debouncer = new Debouncer(500);
 
 const FetchSelect = props => {
-  const { url, value, columns, label, onChange, showInOption, showInValue } = props;
+  const { url, value, columns, label, onChange, showInOption, showInValue, open, setOpen, style } = props;
 
   const [search, setSearch] = useState('');
-  const [open, setOpen] = useState(false);
 
   const searchTextColumns = Object.entries(columns)
     .filter(([, { type }]) => type === 'text')
@@ -34,15 +33,15 @@ const FetchSelect = props => {
     selectColumns,
   });
 
-  const items = data?.pageData.map(({ id, productName, photoPath }) => ({
-    label: productName,
+  const items = data?.pageData.map(({ id, photoPath, ...rest }) => ({
+    label: showInOption.map(o => rest[o]).join(' '),
     value: id,
     icon: () => <Avatar source={{ uri: `${api}${photoPath}` }} />,
   })) || [];
 
-  console.log({url, data, loading});
-
   const handleInputChange = val => debouncer.debounce(() => setSearch(val))
+
+  console.log();
 
   return (
     <DropDownPicker
@@ -55,6 +54,7 @@ const FetchSelect = props => {
       searchable
       disableLocalSearch
       onChangeSearchText={handleInputChange}
+      style={style}
     />
   )
 };

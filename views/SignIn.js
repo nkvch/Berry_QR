@@ -1,11 +1,12 @@
 import React, { useContext, useState } from 'react';
 import { View, Text } from 'react-native';
 // import { Input, Button } from 'react-native-elements';
-import { Input, Button } from '@rneui/themed';
+import { Input } from '@rneui/themed';
 import styles from '../styles/styles';
 import request from '../utils/request';
 import { Formik } from 'formik';
 import Context from '../state/context';
+import { Button } from 'react-native';
 
 const url = '/users';
 
@@ -25,7 +26,6 @@ const SignIn = () => {
       callback: (status, response) => {
         if (status === 'ok') {
           const { token, ...user } = response.data;
-          console.log({ token, ...user });
 
           login(token, user);
         } else if (status === 'error') {

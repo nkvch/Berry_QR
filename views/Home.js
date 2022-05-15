@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 import { View, Text } from 'react-native';
 import styles from '../styles/styles';
-import { Button, ListItem } from '@rneui/themed';
 import Context from '../state/context';
+import { Button } from 'react-native';
 
 const Home = props => {
   const { logout } = useContext(Context);

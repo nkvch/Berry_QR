@@ -31,8 +31,6 @@ function QrScanner({ jumpTo }) {
     return <Text>No access to camera</Text>;
   }
 
-  console.log({ hasPermission, scanned });
-
   return (
     <View style={styles.main}>
       <View style={styles.block}>

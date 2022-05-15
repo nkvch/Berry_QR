@@ -51,6 +51,7 @@ const ContextWrapper = ({ children }) => {
 
           login(token, userData);
         } else if (status === 'error') {
+          console.log(response);
           logout();
         }
       }

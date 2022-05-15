@@ -22,14 +22,10 @@ export default StyleSheet.create({
     marginTop: 20,
     padding: 20,
     borderRadius: 12,
-    height: '70%',
+    // height: '94%',
   },
   QrScanner: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
+    height: 400,
   },
   barStyle: {
     backgroundColor: 'white',
@@ -87,5 +83,18 @@ export default StyleSheet.create({
   },
   mb: num => ({
     marginBottom: num,
+  }),
+  dateTimeContainer: {
+    display: 'flex',
+    width: '100%'
+  },
+  fetchSelect: open => !open ? ({
+    zIndex: 0,
+  }) : ({}),
+  stickBottom: {
+    bottom: 0,
+  },
+  widthPercent: num => ({
+    width: `${num}%`,
   }),
 });
