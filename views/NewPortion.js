@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import Context from '../state/context';
 import { Text, Dialog, Input, Image, Avatar } from '@rneui/themed';
 import useApi from '../utils/hooks/useApi';
-import { View } from 'react-native';
+import { Alert, View } from 'react-native';
 import FetchSelect from '../components/FetchSelect';
 import { api } from '../api';
 import styles from '../styles/styles';
@@ -57,6 +57,7 @@ const NewPortion = ({
   const { loading, data, fetchError } = useApi({ url }, { berryId });
   const [showPicker, setShowPicker] = useState(false);
   const [mode, setMode] = useState('date');
+  const [saving, setSaving] = useState(false);
 
   const initialSelectsOpen = {
     employees: false,
@@ -88,7 +89,6 @@ const NewPortion = ({
 
   const onChangeDateTimePicker = handleChange => (_, date) => {
     handleChange('dateTime')(date);
-    console.log(date);
     setShowPicker(false);
   };
 
@@ -116,12 +116,15 @@ const NewPortion = ({
         amount: parseFloat(values.amount),
       },
       callback: (status, response) => {
+        setSaving(false);
         if (status === 'ok') {
-          // notification.open({
-          //   type: 'success',
-          //   title: 'Данные успешно записаны',
-          // });
-          // router.push('/observe');
+          const { amount, dateTime, employeeId, productId } = response.data;
+
+          Alert.alert(
+            'Новая запись',
+            `Данные о сборе ${amount} кг продукта с ID ${productId} сотрудником с ID ${employeeId} в ${dateTime} успешно записаны.`,
+            [{ text: 'ОК' }],
+          );
         } else if (status === 'error') {
           // notification.open({
           //   type: status,
@@ -130,13 +133,14 @@ const NewPortion = ({
         }
       }
     });
+    setSaving(true);
   };
   
   return (
     <View style={styles.main}>
       <View style={styles.block}>
         {
-          berryId && loading ? <Dialog.Loading /> : (
+          (berryId && loading || saving) ? <Dialog.Loading /> : (
             <View style={styles.flexColumn}>
               <FetchSelect
                 url="/employees"
@@ -144,6 +148,7 @@ const NewPortion = ({
                 showInOption={['firstName', 'lastName']}
                 onChange={handleChange('employeeId')}
                 value={values.employeeId}
+                valueSearch={data ? `${data.firstName} ${data.lastName}` : ''}
                 open={selectsOpen.employees}
                 setOpen={setSelectOpen('employees')}
                 style={[styles.mb(5), styles.fetchSelect(selectsOpen.employees)]}

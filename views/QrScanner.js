@@ -43,8 +43,8 @@ function QrScanner({ jumpTo }) {
             />
           )
         }
+        {scanned && <Button title={'Сканировать еще раз'} onPress={() => setScanned(false)} />}
       </View>
-      {scanned && <Button title={'Сканировать еще раз'} onPress={() => setScanned(false)} />}
     </View>
   );
 }

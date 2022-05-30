@@ -10,7 +10,7 @@ import { api } from '../api';
 const debouncer = new Debouncer(500);
 
 const FetchSelect = props => {
-  const { url, value, columns, label, onChange, showInOption, showInValue, open, setOpen, style } = props;
+  const { url, value, columns, label, onChange, showInOption, showInValue, open, setOpen, style, valueSearch } = props;
 
   const [search, setSearch] = useState('');
 
@@ -27,7 +27,7 @@ const FetchSelect = props => {
   const { loading, data } = useApi({ url }, {
     page: 1,
     qty: 10,
-    search,
+    search: search || valueSearch,
     searchTextColumns,
     searchNumberColumns,
     selectColumns,
