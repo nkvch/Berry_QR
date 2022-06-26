@@ -7,16 +7,20 @@ import request from '../utils/request';
 import { Formik } from 'formik';
 import Context from '../state/context';
 import { Button } from 'react-native';
+import Form from '../components/Form';
 
-const url = '/users';
-
+const fieldsData = {
+  username: {
+    label: 'Имя пользователя',
+    type: 'text',
+  },
+  password: {
+    label: 'Пароль',
+    type: 'password',
+  },
+};
 const SignIn = () => {
   const { login } = useContext(Context);
-
-  const initialValues = {
-    username: '',
-    password: '',
-  };
 
   const onSubmit = values => {
     request({
@@ -36,37 +40,15 @@ const SignIn = () => {
   };
 
   return (
-    <Formik
-      {...{
-        initialValues,
-        onSubmit,
-      }}>
-      {
-        ({ handleChange, handleBlur, handleSubmit, values }) => (
-            <View style={styles.main}>
-              <View style={styles.block}>
-                <Input
-                  placeholder='Имя пользователя'
-                  value={values.username}
-                  onBlur={handleBlur('username')}
-                  onChangeText={handleChange('username')}
-                />
-                <Input
-                  placeholder='Пароль'
-                  value={values.password}
-                  secureTextEntry
-                  onBlur={handleBlur('password')}
-                  onChangeText={handleChange('password')}
-                />
-                <Button
-                  title="Войти"
-                  onPress={handleSubmit}
-                />
-              </View>
-            </View>
-          )
-      }
-    </Formik>
+    <View style={styles.main}>
+      <View style={styles.block}>
+        <Form
+          onSubmit={onSubmit}
+          submitText="Войти"
+          fieldsData={fieldsData}
+        />
+      </View>
+    </View>
   );
 };
 

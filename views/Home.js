@@ -3,17 +3,30 @@ import { View, Text } from 'react-native';
 import styles from '../styles/styles';
 import Context from '../state/context';
 import { Button } from 'react-native';
+import { Card } from 'react-native-paper';
+
+const getMyRoleName = {
+  foreman: 'Бригадир',
+  admin: 'Администратор',
+};
 
 const Home = props => {
-  const { logout } = useContext(Context);
+  const { logout, user } = useContext(Context);
+
+  console.log(user);
 
   return (
     <View style={styles.main}>
       <View style={styles.block}>
-        <Button
-          title="Выйти"
-          onPress={logout}
-        />
+        <Card>
+          <Card.Title title={`${user?.firstName} ${user?.lastName}`} subtitle={getMyRoleName[user?.role?.roleName]} />
+          <Card.Actions>
+            <Button
+              title="Выйти"
+              onPress={logout}
+            />
+          </Card.Actions>
+        </Card>
       </View>
     </View>
   );

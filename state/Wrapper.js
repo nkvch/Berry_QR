@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import SignIn from '../views/SignIn';
 import QrScanner from '../views/QrScanner';
 import styles from '../styles/styles';
@@ -7,6 +7,12 @@ import { BottomNavigation, Appbar } from 'react-native-paper';
 import { Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import NewPortion from '../views/NewPortion';
+import Employees from '../views/Employees';
+import Stats from '../views/Stats';
+
+const getSafeNavigationIndex = (idx, routes) => {
+  return routes.length > idx ? idx : 0;
+};
 
 const Wrapper = ({
   navigation,
@@ -28,7 +34,16 @@ const Wrapper = ({
     signin: {},
     scanner: {},
     newportion: {},
+    employees: {},
+    stats: {},
   });
+
+  useEffect(() => {
+    console.log(index, menuItems.length);
+    if (index >= menuItems.length) {
+      setIndex(0);
+    }
+  }, [menuItems.length]);
 
   const jumpTo = (key, _props) => {
     const targetScreenIndex = menuItems.findIndex(item => item.key === key);
@@ -37,16 +52,22 @@ const Wrapper = ({
     setIndex(targetScreenIndex);
   };
 
+  const isActive = _key => menuItems[index]?.key === _key;
+
   const renderScene = ({ route }) => {
     switch (route.key) {
       case 'home':
-        return <Home jumpTo={jumpTo} {...props.home} />;
+        return <Home isActive={isActive('home')} jumpTo={jumpTo} {...props.home} />;
       case 'signin':
-        return <SignIn jumpTo={jumpTo} {...props.signin} />;
+        return <SignIn isActive={isActive('signin')} jumpTo={jumpTo} {...props.signin} />;
       case 'scanner':
-        return <QrScanner jumpTo={jumpTo} {...props.scanner} />;
+        return <QrScanner isActive={isActive('scanner')} jumpTo={jumpTo} {...props.scanner} />;
       case 'newportion':
-        return <NewPortion jumpTo={jumpTo} {...props.newportion} />;
+        return <NewPortion isActive={isActive('newportion')} jumpTo={jumpTo} {...props.newportion} />;
+      case 'employees':
+        return <Employees isActive={isActive('employees')} jumpTo={jumpTo} {...props.employees} />;
+      case 'stats':
+        return <Stats isActive={isActive('stats')} jumpTo={jumpTo} {...props.stats} />
     }
   }
 
@@ -62,7 +83,7 @@ const Wrapper = ({
         </Appbar>
       </SafeAreaView>
       <BottomNavigation
-        navigationState={{ index, routes: menuItems }}
+        navigationState={{ index: getSafeNavigationIndex(index, menuItems), routes: menuItems }}
         onIndexChange={setIndex}
         renderScene={renderScene}
         barStyle={{ backgroundColor: '#FFF' }}

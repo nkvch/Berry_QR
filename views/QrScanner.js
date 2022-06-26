@@ -5,8 +5,9 @@ import styles from '../styles/styles';
 import getLocalDateTime from '../utils/getLocalDateTime';
 
 import NewPortion from './NewPortion';
+import { Dialog } from '@rneui/base';
 
-function QrScanner({ jumpTo }) {
+function QrScanner({ jumpTo, isActive }) {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
 
@@ -24,18 +25,17 @@ function QrScanner({ jumpTo }) {
     jumpTo('newportion', { berryId });
   };
 
-  if (hasPermission === null) {
-    return <Text>Requesting for camera permission</Text>;
-  }
-  if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
-  }
+  useEffect(() => {
+    setScanned(!isActive);
+  }, [isActive]);
 
   return (
     <View style={styles.main}>
       <View style={styles.block}>
+        { hasPermission === null && <Dialog.Loading /> }
+        { hasPermission === false && <Text>{'Телефон не разрешил нам попользоваться камерой :( '}</Text> }
         {
-          !scanned && (
+          hasPermission && !scanned && (
             <BarCodeScanner
               onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
               barCodeTypes={[BarCodeScanner.Constants.BarCodeType.qr]}
@@ -43,7 +43,7 @@ function QrScanner({ jumpTo }) {
             />
           )
         }
-        {scanned && <Button title={'Сканировать еще раз'} onPress={() => setScanned(false)} />}
+        {hasPermission && scanned && <Button title={'Сканировать еще раз'} onPress={() => setScanned(false)} />}
       </View>
     </View>
   );

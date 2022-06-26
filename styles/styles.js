@@ -24,6 +24,11 @@ export default StyleSheet.create({
     borderRadius: 12,
     // height: '94%',
   },
+  blockBorderless: {
+    backgroundColor: 'white',
+    padding: 20,
+    // height: '94%',
+  },
   QrScanner: {
     height: 400,
   },
@@ -83,6 +88,9 @@ export default StyleSheet.create({
   },
   mb: num => ({
     marginBottom: num,
+  }),
+  mt: num => ({
+    marginTop: num,
   }),
   dateTimeContainer: {
     display: 'flex',

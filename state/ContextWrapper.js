@@ -18,9 +18,11 @@ const unauthMenuOptions = [
 ];
 
 const authMenuOptions = [
-  { key: 'home', title: 'Домой', icon: 'home' },
   { key: 'scanner', title: 'Сканнер', icon: 'qrcode-scan' },
   { key: 'newportion', title: 'Новая порция', icon: 'plus'},
+  { key: 'employees', title: 'Сотрудники', icon: 'account-multiple' },
+  { key: 'stats', title: 'Статистика', icon: 'chart-bar' },
+  { key: 'home', title: 'Домой', icon: 'home' },
 ];
 
 const ContextWrapper = ({ children }) => {

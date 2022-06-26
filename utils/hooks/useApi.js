@@ -28,7 +28,7 @@ const useApi = (config, searchParams, disabled) => {
     }
   }, [config, searchParams]);
 
-  return { loading, data, fetchError, refetch: fetchData }
+  return { loading, data, fetchError, refetch: fetchData, forceLoading: () => setLoading(true) };
 };
 
 export default useApi;
