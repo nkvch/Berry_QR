@@ -4,6 +4,8 @@ import styles from "../styles/styles";
 import { Linking } from "react-native";
 import { useState } from "react";
 import useUser from "../utils/hooks/useUser";
+import { Alert } from "react-native";
+import request from "../utils/request";
 
 const url = '/employees';
 
@@ -56,7 +58,60 @@ const actions = {
   },
 };
 
-const Employees = props => {
+const foremanColumns = {
+  id: {
+    name: 'id',
+    type: 'number',
+  },
+  firstName: {
+    name: 'Имя',
+    type: 'text',
+  },
+  lastName: {
+    name: 'Фамилия',
+    type: 'text',
+  },
+};
+
+const addFieldsData = {
+  firstName: {
+    label: 'Имя сотрудника',
+    type: 'text',
+  },
+  lastName: {
+    label: 'Фамилия сотрудника',
+    type: 'text',
+  },
+  contract: {
+    label: 'Нумар кантракту',
+    type: 'text',
+  },
+  address: {
+    label: 'Адрас',
+    type: 'text',
+  },
+  phone: {
+    label: 'Тэлефон',
+    type: 'phone',
+  },
+  foremanId: {
+    label: 'Выберите бригадира',
+    type: 'fetch-select',
+    fetchSelectConfig: {
+      url: '/foremen',
+      columns: foremanColumns,
+      showInOption: ['firstName', 'lastName'],
+      showInValue: ['firstName', 'lastName'],
+      returnValue: 'id',
+    }
+  },
+  photo: {
+    label: 'Выберите или перетащите сюда фотографию',
+    type: 'file',
+  },
+};
+
+const Employees = ({ jumpTo, adding }) => {
   const me = useUser();
   const [foreman, setForeman] = useState(me.role === 'foreman' ? { foremanId: me.id } : null);
 
@@ -94,6 +149,42 @@ const Employees = props => {
     submitable: false,
   };
 
+  const onAdd = values => {
+    const formData = new FormData();
+    
+    Object.entries(values).forEach(([key, value]) =>
+      formData.append(key, value)
+    );
+
+    request({
+      url: '/employees',
+      method: 'POST',
+      body: formData,
+      withFiles: true,
+      callback: (status, response) => {
+        if (status === 'ok') {
+          const { firstName, lastName } = response.data;
+
+          Alert.alert(
+            'Добавление сотруденика',
+            `Сотрудник ${firstName} ${lastName} успешно добавлен`,
+            [{ text: 'ОК' }],
+          );
+
+          jumpTo('employees', { adding: false });
+        } else {
+          const { message } = response;
+
+          Alert.alert(
+            'Добавление сотруденика',
+            `Ошибка: ${message}`,
+            [{ text: 'ОК' }],
+          )
+        }
+      },
+    });
+  }
+
   return (
     <View style={styles.main}>
       <View style={styles.blockBorderless}>
@@ -103,6 +194,10 @@ const Employees = props => {
           actions={actions}
           customFilters={foreman}
           resetCustomFilters={() => setForeman(null)}
+          onAdd={onAdd}
+          adding={adding}
+          setAdding={isAdding => jumpTo('employees', { adding: isAdding })}
+          addFieldsData={addFieldsData}
           {...(me.role === 'admin' && { filters })}
         />
       </View>

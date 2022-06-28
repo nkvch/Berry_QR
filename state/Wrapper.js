@@ -34,8 +34,9 @@ const Wrapper = ({
     signin: {},
     scanner: {},
     newportion: {},
-    employees: {},
+    employees: { adding: false },
     stats: {},
+    createEmp: {},
   });
 
   useEffect(() => {
@@ -49,6 +50,7 @@ const Wrapper = ({
     const targetScreenIndex = menuItems.findIndex(item => item.key === key);
 
     setProps(prevProps => ({ ...prevProps, [key]: _props }));
+    
     setIndex(targetScreenIndex);
   };
 

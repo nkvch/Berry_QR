@@ -8,13 +8,14 @@ import { api } from '../api';
 import { ScrollView, RefreshControl, Text, View } from 'react-native';
 import Form from './Form';
 import styles from '../styles/styles';
+import { Button as NativeButton } from 'react-native';
 // import Form from './Form';
 // import styles from '../../styles/PaginatedTable.module.scss';
 
 const debouncer = new Debouncer(500);
 
 const PaginatedTable = props => {
-  const { url, columns, actions, noSearch, customFilters, customAddButton, filters, classNames, resetCustomFilters } = props;
+  const { url, columns, actions, noSearch, customFilters, customAddButton, filters, classNames, resetCustomFilters, onAdd, addFieldsData, adding, setAdding } = props;
 
   const [page, setPage] = useState(1);
   const [qty, setQty] = useState(10);
@@ -89,7 +90,22 @@ const PaginatedTable = props => {
     ? 1
     : Math.ceil(total/qty);
 
-  return (
+  return adding ? (
+    <ScrollView>
+      <Form
+        onSubmit={onAdd}
+        submitText="Сохранить"
+        fieldsData={addFieldsData}
+        className="wide"
+      />
+      <View style={styles.mt(10)}>
+        <NativeButton
+          title="Отменить"
+          onPress={() => setAdding(false)}
+        />
+      </View>
+    </ScrollView>
+  ) : (
     <ScrollView
       refreshControl={
         <RefreshControl
@@ -169,13 +185,14 @@ const PaginatedTable = props => {
           showFastPaginationControls
         />
       </DataTable>
-      {/* <Button
-        variant="contained"
-        style={{ marginTop: '1em' }}
-        onClick={customAddButton || (() => router.push(`${url}/create`))}
-      >
-        Добавить
-      </Button> */}
+      {
+        adding !== undefined && (
+          <NativeButton
+            title="Добавить"
+            onPress={() => setAdding(true)}
+          />
+        )
+      }
     </ScrollView>
   )
 };

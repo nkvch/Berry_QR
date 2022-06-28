@@ -7,6 +7,9 @@ import { Button as PaperButton } from 'react-native-paper';
 import { Input } from '@rneui/themed';
 import { useState } from 'react';
 import RNDateTimePicker from '@react-native-community/datetimepicker';
+import { launchImageLibraryAsync } from 'expo-image-picker';
+import ImageUpload from './ImageUpload';
+import PhoneInput from 'react-native-phone-input';
 
 const renderField = (fieldData, { values, handleChange, setFieldValue, handleBlur }) => {
   const [field, config] = fieldData;
@@ -15,19 +18,23 @@ const renderField = (fieldData, { values, handleChange, setFieldValue, handleBlu
   let fieldToRender;
 
   switch (type) {
-    // case 'file':
-    //   fieldToRender = (
-    //     <FileUploader
-    //       handleChange={file => setFieldValue(field, file)}
-    //       label={label}
-    //       name={field}
-    //       hoverTitle="Отпускайте"
-    //       types={['JPG', 'PNG', 'GIF']}
-    //     >
-    //       <DroppableImageContainer image={values[field]}/>
-    //     </FileUploader>
-    //   );
-    //   break;
+    case 'file':
+      fieldToRender = (
+        <ImageUpload
+          onChange={file => setFieldValue(field, file)}
+          value={values[field]}
+        />
+        // <FileUploader
+        //   handleChange={file => setFieldValue(field, file)}
+        //   label={label}
+        //   name={field}
+        //   hoverTitle="Отпускайте"
+        //   types={['JPG', 'PNG', 'GIF']}
+        // >
+        //   <DroppableImageContainer image={values[field]}/>
+        // </FileUploader>
+      );
+      break;
     case 'fetch-select':
       const {
         fetchSelectConfig: { url, columns, showInOption, returnValue, icon, customFilters },
@@ -117,21 +124,28 @@ const renderField = (fieldData, { values, handleChange, setFieldValue, handleBlu
     // case 'phone':
     //   fieldToRender = (
     //     <PhoneInput
-    //       country={'by'}
+    //       countriesList={['by']}
     //       name={field}
-    //       onChange={phoneNumber => setFieldValue(field, phoneNumber)}
-    //       value={values[field]}
-    //       specialLabel={label}
-    //       isValid={(value, country) => country.iso2 === 'by' && !!value.match(/^\d{12}$/)}
-    //       style={{
-    //         marginBottom: '8px',
-    //       }}
-    //       inputStyle={{
-    //         width: '100%',
-    //       }}
+    //       onChangePhoneNumber={c => console.log(c)}
+    //       initialValue={values[field]}
+    //       // pickerItemStyle=
     //     />
+    //     // <PhoneInput
+    //     //   country={'by'}
+    //     //   name={field}
+    //     //   onChange={phoneNumber => setFieldValue(field, phoneNumber)}
+    //     //   value={values[field]}
+    //     //   specialLabel={label}
+    //     //   isValid={(value, country) => country.iso2 === 'by' && !!value.match(/^\d{12}$/)}
+    //     //   style={{
+    //     //     marginBottom: '8px',
+    //     //   }}
+    //     //   inputStyle={{
+    //     //     width: '100%',
+    //     //   }}
+    //     // />
     //   );
-    //   break;
+      break;
     default:
       fieldToRender = (
         <Input
