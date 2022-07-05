@@ -10,10 +10,23 @@ import RNDateTimePicker from '@react-native-community/datetimepicker';
 import { launchImageLibraryAsync } from 'expo-image-picker';
 import ImageUpload from './ImageUpload';
 import PhoneInput from 'react-native-phone-input';
+import DropDownPicker from 'react-native-dropdown-picker';
+import applyCallbackIfExists from '../utils/applyCallback';
 
-const renderField = (fieldData, { values, handleChange, setFieldValue, handleBlur }) => {
+const renderField = (fieldData, {
+  values,
+  handleChange,
+  setFieldValue: setFieldValueWithoutCallback,
+  onChangeCallback,
+  handleBlur,
+}) => {
   const [field, config] = fieldData;
   const { label, type, index, open, setOpen } = config;
+
+  const setFieldValue = applyCallbackIfExists(setFieldValueWithoutCallback, (_field, _value) => onChangeCallback({
+    ...values,
+    [_field]: _value,
+  }));
 
   let fieldToRender;
 
@@ -34,6 +47,49 @@ const renderField = (fieldData, { values, handleChange, setFieldValue, handleBlu
         //   <DroppableImageContainer image={values[field]}/>
         // </FileUploader>
       );
+      break;
+    case 'select':
+      const { selectConfig: { options } } = config;
+
+      fieldToRender = (
+        <DropDownPicker
+          key={`select${index}`}
+          translation={{ PLACEHOLDER: label, SEARCH_PLACEHOLDER: 'Поиск...', NOTHING_TO_SHOW: 'Нет результатов' }}
+          items={options}
+          value={values[field]}
+          open={open}
+          setOpen={setOpen}
+          setValue={_value => {
+            let value;
+
+            if (_value) {
+                value = typeof _value === 'function' ? _value() : _value;
+            }
+
+            if (value) {
+              setFieldValue(field, value);
+            } else {
+              setFieldValue(field, undefined);
+            }
+          }}
+          listMode="MODAL"
+        />
+        // <FormControl style={style}>
+        //   <InputLabel>{label}</InputLabel>
+        //   <Select
+        //     value={values[field]}
+        //     name={field}
+        //     label={label}
+        //     onChange={handleChange}
+        //   >
+        //     {
+        //       options.map(({ value, text }, idx) => (
+        //         <MenuItem key={`selectitem${idx}${value}${text}`} value={value}>{text}</MenuItem>
+        //       ))
+        //     }
+        //   </Select>
+        // </FormControl>
+      )
       break;
     case 'fetch-select':
       const {
@@ -163,7 +219,7 @@ const renderField = (fieldData, { values, handleChange, setFieldValue, handleBlu
   return fieldToRender;
 };
 
-const Form = ({ onSubmit, submitText, fieldsData, submitable, resetable, resetText, hidden, intable, resetFilters }) => {
+const Form = ({ onSubmit, submitText, fieldsData, submitable, resetable, resetText, hidden, intable, resetFilters, onChangeCallback }) => {
   const [openedSelect, setOpenedSelect] = useState(null);
   const [dateTimeMode, setDateTimeMode] = useState('date');
 
@@ -171,7 +227,7 @@ const Form = ({ onSubmit, submitText, fieldsData, submitable, resetable, resetTe
     .map(([field, config], idx) => {
       config.index = idx;
 
-      if (['fetch-select', 'datetime'].includes(config.type)) {
+      if (['fetch-select', 'datetime', 'select'].includes(config.type)) {
         config = {
           ...config,
           open: idx === openedSelect,
@@ -200,7 +256,7 @@ const Form = ({ onSubmit, submitText, fieldsData, submitable, resetable, resetTe
           <View style={hidden && { display: 'none' }}>
               { 
                 _fieldsData.map(
-                  fieldData => renderField(fieldData, { values, handleChange, setFieldValue, handleBlur })
+                  fieldData => renderField(fieldData, { values, handleChange, setFieldValue, handleBlur, onChangeCallback })
                 )
               }
               {

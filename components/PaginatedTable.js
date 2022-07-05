@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Button, DataTable } from 'react-native-paper';
+import { Button, DataTable, Chip } from 'react-native-paper';
 import Debouncer from '../utils/debouncer';
 import useApi from '../utils/hooks/useApi';
 import { Avatar, Dialog } from '@rneui/themed';
@@ -15,7 +15,7 @@ import { Button as NativeButton } from 'react-native';
 const debouncer = new Debouncer(500);
 
 const PaginatedTable = props => {
-  const { url, columns, actions, noSearch, customFilters, customAddButton, filters, classNames, resetCustomFilters, onAdd, addFieldsData, adding, setAdding } = props;
+  const { url, columns, actions, chips, noSearch, customFilters, customAddButton, filters, classNames, resetCustomFilters, onAdd, addFieldsData, adding, setAdding, addable, pageActions } = props;
 
   const [page, setPage] = useState(1);
   const [qty, setQty] = useState(10);
@@ -77,9 +77,9 @@ const PaginatedTable = props => {
   };
 
   const renderActions = (actions, idx) => Object.entries(actions)
-    .map(([, { icon, tooltip, action }]) => (
+    .map(([name, { icon, tooltip, action, customRender }]) => customRender ? customRender(rows[idx], null, refetch, forceLoading) : (
       <Button
-        key={`action-button${idx}`}
+        key={`action-button${idx}${name}`}
         onPress={() => action(rows[idx], null, refetch, forceLoading)}
         icon={icon}
         color="black"
@@ -154,24 +154,31 @@ const PaginatedTable = props => {
           }
         </DataTable.Header>
           {rows.map((row, idx) => (
-            <DataTable.Row key={idx}>
+            <>
               {
-                Object.entries(row).filter(filterHiddenFields).map(([key, value]) => (
-                  <DataTable.Cell key={`${idx}${key}${value}`}>
-                    {renderCellContend(key, value)}
-                  </DataTable.Cell>
-                ))
+                chips ? Object.values(chips).filter(({ show }) => show(row)).map(({ label }) => (
+                  <Chip key={`chip${idx}${label}`}>{label}</Chip>
+                )) : null
               }
-              {
-                actions
-                  ? (
-                    <DataTable.Cell key={`${idx}-actions`}>
-                      {renderActions(actions, idx)}
+              <DataTable.Row key={idx}>
+                {
+                  Object.entries(row).filter(filterHiddenFields).map(([key, value]) => (
+                    <DataTable.Cell key={`${idx}${key}${value}`}>
+                      {renderCellContend(key, value)}
                     </DataTable.Cell>
-                  )
-                  : null
-              }
-            </DataTable.Row>
+                  ))
+                }
+                {
+                  actions
+                    ? (
+                      <DataTable.Cell key={`${idx}-actions`}>
+                        {renderActions(actions, idx)}
+                      </DataTable.Cell>
+                    )
+                    : null
+                }
+              </DataTable.Row>
+            </>
           ))}
 
         <DataTable.Pagination
@@ -186,12 +193,25 @@ const PaginatedTable = props => {
         />
       </DataTable>
       {
-        adding !== undefined && (
-          <NativeButton
-            title="Добавить"
-            onPress={() => setAdding(true)}
-          />
+        addable && adding !== undefined && (
+          <View style={{ marginBottom: 8 }}>
+            <NativeButton
+              title="Добавить"
+              onPress={() => setAdding(true)}
+            />
+          </View>
         )
+      }
+      {
+        pageActions && Object.entries(pageActions).map(([name, { icon, title, action, disabled, customRender }]) => customRender ? customRender(data) : (
+          <View style={{ marginBottom: 8 }}>
+            <NativeButton
+              title={title}
+              onPress={() => action(data, null, refetch, forceLoading)}
+              disabled={disabled}
+            />
+          </View>
+        ))
       }
     </ScrollView>
   )
