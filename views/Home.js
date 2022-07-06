@@ -13,8 +13,6 @@ const getMyRoleName = {
 const Home = props => {
   const { logout, user } = useContext(Context);
 
-  console.log(user);
-
   return (
     <View style={styles.main}>
       <View style={styles.block}>

@@ -117,6 +117,9 @@ const chips = {
   workTomorrow: {
     show: emp => emp.workTomorrow,
     label: 'Работает завтра',
+    style: {
+      backgroundColor: 'rgba(255, 71, 71, 0.5)',
+    }
   },
 };
 
@@ -128,7 +131,7 @@ const Employees = ({ jumpTo, adding }) => {
   const [customFilters, setCustomFilters] = useState(initFilters);
 
   const onChangeFilters = values => {
-    const { workTomorrow } = values;
+    const { workTomorrow, foremanId } = values;
     setCustomFilters({
       ...(typeof foremanId === 'number' && { foremanId }),
       ...(workTomorrow !== 'null' && { workTomorrow }),

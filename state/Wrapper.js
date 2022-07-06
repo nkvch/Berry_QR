@@ -40,7 +40,6 @@ const Wrapper = ({
   });
 
   useEffect(() => {
-    console.log(index, menuItems.length);
     if (index >= menuItems.length) {
       setIndex(0);
     }

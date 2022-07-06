@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import useApi from '../utils/hooks/useApi';
 import Debouncer from '../utils/debouncer';
-import styles from '../styles/styles';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { Avatar } from '@rneui/themed';
 import { api } from '../api';
@@ -23,7 +22,11 @@ const FetchSelect = props => {
   const { loading, data } = useApi({ url }, {
     page: 1,
     qty: 30,
-    search,
+    ...(open ? {
+      search,
+    } : {
+      id: value,
+    }),
     searchColumns,
     selectColumns,
     ...(customFilters),
@@ -45,9 +48,7 @@ const FetchSelect = props => {
 
   return (
     <DropDownPicker
-      onClose={() => setSearch('')}
-      onSelectItem={() => setSearch('')}
-      closeOnBackPressed={() => setSearch('')}
+      onOpen={() => setSearch('')}
       key={index}
       translation={{ PLACEHOLDER: label, SEARCH_PLACEHOLDER: 'Поиск...', NOTHING_TO_SHOW: 'Нет результатов' }}
       items={items}

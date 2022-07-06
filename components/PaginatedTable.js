@@ -15,7 +15,7 @@ import { Button as NativeButton } from 'react-native';
 const debouncer = new Debouncer(500);
 
 const PaginatedTable = props => {
-  const { url, columns, actions, chips, noSearch, customFilters, customAddButton, filters, classNames, resetCustomFilters, onAdd, addFieldsData, adding, setAdding, addable, pageActions } = props;
+  const { url, columns, actions, chips, tableChips, noSearch, customFilters, customAddButton, filters, classNames, resetCustomFilters, onAdd, addFieldsData, adding, setAdding, addable, pageActions } = props;
 
   const [page, setPage] = useState(1);
   const [qty, setQty] = useState(10);
@@ -135,10 +135,17 @@ const PaginatedTable = props => {
       }
       {
         filters && (
-          <Form {...filters} intable resetFilters={resetCustomFilters} />
+          <Form {...filters} intable resetFilters={resetCustomFilters} onChangeCallback={values => {
+            if (filters.onChangeCallback) {
+              filters.onChangeCallback(values);
+            }
+
+            setPage(1);
+          }}/>
         )
       }
       <DataTable style={{ overflow: 'visible' }}>
+        { tableChips && data ? tableChips.map(({ label, style }, idx) => <Chip key={`customchip${idx}`} style={style}>{label(data)}</Chip>) : null }
         <DataTable.Header>
           {
             Object.values(columns).filter(filterHiddenHeaders).map(({ name }) => (
@@ -156,8 +163,8 @@ const PaginatedTable = props => {
           {rows.map((row, idx) => (
             <>
               {
-                chips ? Object.values(chips).filter(({ show }) => show(row)).map(({ label }) => (
-                  <Chip key={`chip${idx}${label}`}>{label}</Chip>
+                chips ? Object.values(chips).filter(({ show }) => show(row)).map(({ label, style }) => (
+                  <Chip style={style} key={`chip${idx}${label}`}>{label}</Chip>
                 )) : null
               }
               <DataTable.Row key={idx}>

@@ -23,10 +23,12 @@ const renderField = (fieldData, {
   const [field, config] = fieldData;
   const { label, type, index, open, setOpen } = config;
 
-  const setFieldValue = applyCallbackIfExists(setFieldValueWithoutCallback, (_field, _value) => onChangeCallback({
+  const callback = onChangeCallback ? (_field, _value) => onChangeCallback({
     ...values,
     [_field]: _value,
-  }));
+  }) : null
+
+  const setFieldValue = applyCallbackIfExists(setFieldValueWithoutCallback, callback);
 
   let fieldToRender;
 

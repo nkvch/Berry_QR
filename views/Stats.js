@@ -6,6 +6,7 @@ import PaginatedTable from "../components/PaginatedTable";
 import styles from "../styles/styles";
 import useUser from "../utils/hooks/useUser";
 import request from "../utils/request";
+import parsePrice from "../utils/parsePrice";
 
 const foremenColumns = {
   id: {
@@ -193,6 +194,14 @@ const Stats = props => {
     },
   };
 
+  const tableChips = [{
+    label: data => data?.totalAmount ? `Итого ${data.totalAmount.allAmount.toFixed(2)} кг или ${parsePrice(data.totalAmount.allPrice)}` : '',
+    style: {
+      backgroundColor: 'rgba(0, 128, 0, 0.564)',
+      marginTop: 8,
+    },
+  }];
+
   const onChangeFilters = values => {
     setShowFilters(false);
     setFilters(values);
@@ -224,7 +233,7 @@ const Stats = props => {
         <Form
           fieldsData={fieldsData}
           onSubmit={onChangeFilters}
-          submitText="Фильровать"
+          submitText="Фильтровать"
           resetable
           resetText="Сбросить фильтры"
           hidden={!showFilters}
@@ -239,6 +248,7 @@ const Stats = props => {
               <PaginatedTable
                 url="/history"
                 columns={columns}
+                tableChips={tableChips}
                 noSearch
                 customFilters={getFilters()}
                 actions={actions}

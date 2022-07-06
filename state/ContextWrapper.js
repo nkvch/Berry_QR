@@ -46,9 +46,6 @@ const ContextWrapper = ({ children }) => {
       url: '/auth',
       callback: (status, response) => {
         if (status === 'ok') {
-
-          console.log('OK');
-
           const { token, ...userData } = response.data;
 
           login(token, userData);

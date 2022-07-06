@@ -51,8 +51,6 @@ const NewPortion = ({
   const [saving, setSaving] = useState(false);
   const me = useUser();
 
-  console.log(me);
-
   const getFieldsData = data => ({
     employeeId: {
       label: 'Выберите сотрудника',
