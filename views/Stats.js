@@ -100,8 +100,9 @@ const columns = {
 
 const actions = {
   delete: {
+    label: 'Удалить',
     icon: 'delete',
-    action: (rec, _, refetch, forceLoading) => {
+    action: (rec, _, refetch, forceLoading, setClickedItem) => {
       Alert.alert(
         'Удаление записи из истории',
         `Вы действительно хотите запись ${rec.id} ${rec.employee?.firstName || ''} ${rec.employee?.lastName || ''} ${rec.product?.productName || ''} ${rec.amount}?`,
@@ -120,6 +121,7 @@ const actions = {
                     ''
                     [{ text: 'OK' }],
                   );
+                  setClickedItem(null);
                   refetch();
                 } else {
                   Alert.alert(

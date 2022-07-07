@@ -22,7 +22,7 @@ const FetchSelect = props => {
   const { loading, data } = useApi({ url }, {
     page: 1,
     qty: 30,
-    ...(open ? {
+    ...(open || !value ? {
       search,
     } : {
       id: value,

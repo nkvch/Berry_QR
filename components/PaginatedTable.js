@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Button, DataTable, Chip } from 'react-native-paper';
+import { Button, DataTable, Chip, Modal } from 'react-native-paper';
 import Debouncer from '../utils/debouncer';
 import useApi from '../utils/hooks/useApi';
 import { Avatar, Dialog } from '@rneui/themed';
 import { TextInput } from 'react-native-paper';
 import { api } from '../api';
-import { ScrollView, RefreshControl, Text, View } from 'react-native';
+import { ScrollView, RefreshControl, Text, View, TouchableOpacity } from 'react-native';
 import Form from './Form';
 import styles from '../styles/styles';
 import { Button as NativeButton } from 'react-native';
@@ -15,11 +15,16 @@ import { Button as NativeButton } from 'react-native';
 const debouncer = new Debouncer(500);
 
 const PaginatedTable = props => {
-  const { url, columns, actions, chips, tableChips, noSearch, customFilters, customAddButton, filters, classNames, resetCustomFilters, onAdd, addFieldsData, adding, setAdding, addable, pageActions } = props;
+  const { url, columns, actions, chips, tableChips, noSearch, customFilters,
+    customAddButton, filters, classNames, resetCustomFilters, onAdd,
+    addFieldsData, adding, setAdding, addable, pageActions, selectOn } = props;
 
   const [page, setPage] = useState(1);
   const [qty, setQty] = useState(10);
   const [search, setSearch] = useState('');
+
+  const [clickedItem, setClickedItem] = useState(null);
+  const [selected, setSelected] = useState([]);
 
   const searchColumns = Object.entries(columns)
     .filter(([, { type }]) => ['text', 'number'].includes(type))
@@ -76,15 +81,33 @@ const PaginatedTable = props => {
     }
   };
 
-  const renderActions = (actions, idx) => Object.entries(actions)
-    .map(([name, { icon, tooltip, action, customRender }]) => customRender ? customRender(rows[idx], null, refetch, forceLoading) : (
+  const renderActions = actions => Object.entries(actions)
+    .map(([name, { icon, label, action, customRender }]) => customRender ? customRender(rows[clickedItem], null, refetch, forceLoading) : (
       <Button
-        key={`action-button${idx}${name}`}
-        onPress={() => action(rows[idx], null, refetch, forceLoading)}
+        key={`action-button${clickedItem}${name}`}
+        onPress={() => action(rows[clickedItem], null, refetch, forceLoading, setClickedItem)}
         icon={icon}
         color="black"
-      />
+      >
+        {label}
+      </Button>
     ));
+
+  const onPressRow = (row, idx) => {
+    if (selected.length) {
+      const isRowSelected = selected.includes(row[selectOn]);
+
+      setSelected(prev => isRowSelected ? prev.filter(el => el !== row[selectOn]) : [...prev, row[selectOn]]);
+    } else {
+      setClickedItem(idx);
+    };
+  };
+
+  const onLongPressRow = row => {
+    if (selectOn) {
+      setSelected([row[selectOn]]);
+    }
+  };
 
   const totallyPages = (qty === -1 || total === 0)
     ? 1
@@ -144,6 +167,12 @@ const PaginatedTable = props => {
           }}/>
         )
       }
+      <Dialog
+        isVisible={Number.isSafeInteger(clickedItem)}
+        onPressOut={() => setClickedItem(null)}
+      >
+        {renderActions(actions)}
+      </Dialog>
       <DataTable style={{ overflow: 'visible' }}>
         { tableChips && data ? tableChips.map(({ label, style }, idx) => <Chip key={`customchip${idx}`} style={style}>{label(data)}</Chip>) : null }
         <DataTable.Header>
@@ -151,13 +180,6 @@ const PaginatedTable = props => {
             Object.values(columns).filter(filterHiddenHeaders).map(({ name }) => (
               <DataTable.Title key={name}>{name}</DataTable.Title>
             ))
-          }
-          {
-            actions
-              ? (
-                <DataTable.Title key="actions-header">Действия</DataTable.Title>
-              )
-              : null
           }
         </DataTable.Header>
           {rows.map((row, idx) => (
@@ -167,24 +189,20 @@ const PaginatedTable = props => {
                   <Chip style={style} key={`chip${idx}${label}`}>{label}</Chip>
                 )) : null
               }
-              <DataTable.Row key={idx}>
-                {
-                  Object.entries(row).filter(filterHiddenFields).map(([key, value]) => (
-                    <DataTable.Cell key={`${idx}${key}${value}`}>
-                      {renderCellContend(key, value)}
-                    </DataTable.Cell>
-                  ))
-                }
-                {
-                  actions
-                    ? (
-                      <DataTable.Cell key={`${idx}-actions`}>
-                        {renderActions(actions, idx)}
+              <TouchableOpacity
+                onPress={() => onPressRow(row, idx)}
+                onLongPress={() => onLongPressRow(row, idx)}
+              >
+                <DataTable.Row key={idx} style={selected.includes(row[selectOn]) ? { backgroundColor: '#72c3f2', borderRadius: 5 } : null}>
+                  {
+                    Object.entries(row).filter(filterHiddenFields).map(([key, value]) => (
+                      <DataTable.Cell key={`${idx}${key}${value}`}>
+                        {renderCellContend(key, value)}
                       </DataTable.Cell>
-                    )
-                    : null
-                }
-              </DataTable.Row>
+                    ))
+                  }
+                </DataTable.Row>
+              </TouchableOpacity>
             </>
           ))}
 
@@ -210,15 +228,25 @@ const PaginatedTable = props => {
         )
       }
       {
-        pageActions && Object.entries(pageActions).map(([name, { icon, title, action, disabled, customRender }]) => customRender ? customRender(data) : (
+        pageActions && Object.entries(pageActions).map(([name, { icon, title, action, customRender }]) => customRender ? customRender(data) : (
           <View style={{ marginBottom: 8 }}>
             <NativeButton
-              title={title}
-              onPress={() => action(data, null, refetch, forceLoading)}
-              disabled={disabled}
+              title={title(selected)}
+              onPress={() => action(data, null, refetch, forceLoading, selected, setSelected)}
+              disabled={!selected.length}
             />
           </View>
         ))
+      }
+      {
+        selected.length ? (
+          <View style={{ marginBottom: 8 }}>
+            <NativeButton
+              title={'Отменить выделенные'}
+              onPress={() => setSelected([])}
+            />
+          </View>
+        ) : null
       }
     </ScrollView>
   )

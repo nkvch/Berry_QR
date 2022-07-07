@@ -125,7 +125,6 @@ const chips = {
 
 const Employees = ({ jumpTo, adding }) => {
   const me = useUser();
-  const [selected, setSelected] = useState([]);
 
   const initFilters = me.role === 'foreman' ? { foremanId: me.id } : {};
   const [customFilters, setCustomFilters] = useState(initFilters);
@@ -222,12 +221,14 @@ const Employees = ({ jumpTo, adding }) => {
 
   const actions = {
     call: {
+      label: 'Позвонить',
       icon: 'cellphone-basic',
       action: emp => {
         Linking.openURL(`tel:+${emp.phone}`);
       },
     },
     goToAddress: {
+      label: 'Найти',
       icon: 'map-marker',
       action: emp => {
         const buttons = [{
@@ -269,23 +270,14 @@ const Employees = ({ jumpTo, adding }) => {
         );
       },
     },
-    select: {
-      customRender: ({ id }, _, refetch, forceLoading) => (
-        <Checkbox
-          status={selected.includes(id) ? 'checked' : 'unchecked'}
-          key={`checkboxaction${id}`}
-          onPress={() => selected.includes(id) ? setSelected(prev => prev.filter(el => el !== id)) : setSelected(prev => ([...prev, id]))}
-        />
-      ),
-    }
   };
   
 
   const pageActions = {
     workTommorow: {
       // icon: <Work />,
-      title: `Поставить смену (${selected.length} сотрудников)`,
-      action: (_, __, refetch, forceLoading) => {
+      title: selected => `Поставить смену (${selected.length} сотрудников)`,
+      action: (_, __, refetch, forceLoading, selected, setSelected) => {
         forceLoading(true);
 
         request({
@@ -309,12 +301,11 @@ const Employees = ({ jumpTo, adding }) => {
           },
         });
       },
-      disabled: !selected.length,
     },
     dontWorkTommorow: {
       // icon: <WorkOff />,
-      title: `Убрать смену (${selected.length} сотрудников)`,
-      action: (_, __, refetch, forceLoading) => {
+      title: selected => `Убрать смену (${selected.length} сотрудников)`,
+      action: (_, __, refetch, forceLoading, selected, setSelected) => {
         forceLoading(true);
 
         request({
@@ -338,7 +329,6 @@ const Employees = ({ jumpTo, adding }) => {
           },
         });
       },
-      disabled: !selected.length,
     },
   }
 
@@ -352,6 +342,7 @@ const Employees = ({ jumpTo, adding }) => {
           customFilters={customFilters}
           resetCustomFilters={() => setCustomFilters(initFilters)}
           onAdd={onAdd}
+          selectOn="id"
           addable={me.role === 'admin'}
           adding={adding}
           chips={chips}
