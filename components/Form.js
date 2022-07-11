@@ -59,6 +59,7 @@ const renderField = (fieldData, {
           translation={{ PLACEHOLDER: label, SEARCH_PLACEHOLDER: 'Поиск...', NOTHING_TO_SHOW: 'Нет результатов' }}
           items={options}
           value={values[field]}
+          style={[styles.mb(5)]}
           open={open}
           setOpen={setOpen}
           setValue={_value => {

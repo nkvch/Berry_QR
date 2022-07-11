@@ -7,6 +7,7 @@ import styles from "../styles/styles";
 import useUser from "../utils/hooks/useUser";
 import request from "../utils/request";
 import parsePrice from "../utils/parsePrice";
+import getStartOfToday from "../utils/getStartOfToday";
 
 const foremenColumns = {
   id: {
@@ -164,6 +165,19 @@ const Stats = props => {
         },
       },
     }),
+    workTomorrow: {
+      label: 'Фильтровать по смене',
+      type: 'select',
+      selectConfig: {
+        options: [
+          { value: 'true', label: 'Работающие' },
+          { value: 'false', label: 'Не работающие' },
+          { value: 'null', label: 'Все' },
+        ],
+      },
+      style: { marginBottom: 8 },
+      defaultValue: 'null',
+    },
     employee: {
       label: 'Сотрудник',
       type: 'fetch-select',
@@ -240,6 +254,16 @@ const Stats = props => {
           resetText="Сбросить фильтры"
           hidden={!showFilters}
         />
+        {/* <View style={styles.mt(10)}>
+          <Button
+            title="Только за сегодня"
+            onPress={() => setFilters(prev => ({
+              ...prev,
+              fromDateTime: getStartOfToday(),
+            }))}
+            color="green"
+          />
+        </View> */}
         {
           !showFilters && (
             <>
