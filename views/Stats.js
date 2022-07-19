@@ -9,20 +9,13 @@ import request from "../utils/request";
 import parsePrice from "../utils/parsePrice";
 import getStartOfToday from "../utils/getStartOfToday";
 
-const foremenColumns = {
-  id: {
-    name: 'id',
-    type: 'number',
-  },
-  firstName: {
-    name: 'Имя',
-    type: 'text',
-  },
-  lastName: {
-    name: 'Фамилия',
-    type: 'text',
-  },
-};
+const employeeFlags = [
+  { value: 'isWorking', text: 'Работает', color: '#fc7303' },
+  { value: 'printedQR', text: 'QR распечатан', color: '#03a5fc' },
+  { value: 'blacklisted', text: 'Черный список', color: '#808080' },
+  { value: 'goodWorker', text: 'Хороший работник', color: '#1e9e05' },
+  { value: 'workedBefore', text: 'Работал прежде', color: '#d9c045' },
+];
 
 const employeeColumns = {
   id: {
@@ -58,20 +51,22 @@ const productColumns = {
   },
 };
 
-const columns = {
+const foremanColumns = {
   id: {
-    name: 'ID',
+    name: 'id',
     type: 'number',
-    hidden: true,
   },
-  employeeId: {
-    type: 'number',
-    hidden: true,
+  firstName: {
+    name: 'Имя',
+    type: 'text',
   },
-  productId: {
-    type: 'number',
-    hidden: true,
+  lastName: {
+    name: 'Фамилия',
+    type: 'text',
   },
+};
+
+const columns = {
   amount: {
     name: 'Количество (кг)',
     type: 'number',
@@ -85,17 +80,25 @@ const columns = {
     type: 'included',
     parse: emp => emp ? `${emp.firstName} ${emp.lastName}` : 'Нет данных',
   },
-  product: {
-    name: 'Продукт',
+};
+
+const hiddenButRequiredData = ['employeeId', 'productId'];
+
+const summarizeCols = {
+  employee: {
+    name: 'Сотрудник',
     type: 'included',
-    hidden: true,
-    parse: prod => prod?.productName || 'Нет данных',
+    parse: emp => emp ? `${emp.firstName} ${emp.lastName}` : 'Нет данных',
   },
-  foreman: {
-    name: 'Бригадир',
-    type: 'included',
-    hidden: true,
-    parse: () => {},
+  allAmount: {
+    name: 'Все количество',
+    type: 'custom',
+    render: num => `${num.toFixed(2)} кг`,
+  },
+  allPrice: {
+    name: 'Вся сумма',
+    type: 'custom',
+    render: num => parsePrice(num),
   },
 };
 
@@ -146,10 +149,22 @@ const actions = {
 };
 
 const Stats = props => {
-  const [filters, setFilters] = useState({});
   const me = useUser();
 
   const [showFilters, setShowFilters] = useState(false);
+  const [summarize, setSummarize] = useState(true);
+
+  const defaultSort = summarize ? 'allAmount desc' : 'history.dateTime desc';
+
+  const [defaultSortColumn, defaultSorting] = defaultSort.split(' ');
+
+  const initFilters = {
+    sortColumn: defaultSortColumn,
+    sorting: defaultSorting,
+    fromDateTime: getStartOfToday().toISOString(),
+  };
+
+  const [filters, setFilters] = useState(initFilters);
 
   const fieldsData = {
     ...(me.role === 'admin' && {
@@ -158,26 +173,13 @@ const Stats = props => {
         type: 'fetch-select',
         fetchSelectConfig: {
           url: '/foremen',
-          columns: foremenColumns,
+          columns: foremanColumns,
           showInOption: ['firstName', 'lastName'],
           icon: 'photoPath',
           returnValue: 'id',
         },
       },
     }),
-    workTomorrow: {
-      label: 'Фильтровать по смене',
-      type: 'select',
-      selectConfig: {
-        options: [
-          { value: 'true', label: 'Работающие' },
-          { value: 'false', label: 'Не работающие' },
-          { value: 'null', label: 'Все' },
-        ],
-      },
-      style: { marginBottom: 8 },
-      defaultValue: 'null',
-    },
     employee: {
       label: 'Сотрудник',
       type: 'fetch-select',
@@ -189,24 +191,63 @@ const Stats = props => {
         returnValue: 'id',
       },
     },
-    product: {
-      label: 'Продукт',
-      type: 'fetch-select',
-      fetchSelectConfig: {
-        url: '/products',
-        columns: productColumns,
-        showInOption: ['productName'],
-        icon: 'photoPath',
-        returnValue: 'id',
+    flagsPresent: {
+      label: 'Фильтровать по наличию флага',
+      type: 'multiple-select',
+      defaultValue: [],
+      multipleSelectConfig: {
+        multipleOptions: employeeFlags.map(({ value, text }) => ({ value, label: text })),
       },
+    },
+    flagsAbsent: {
+      label: 'Фильтровать по отсутствию флага',
+      type: 'multiple-select',
+      defaultValue: [],
+      multipleSelectConfig: {
+        multipleOptions: employeeFlags.map(({ value, text }) => ({ value, label: text })),
+      },
+    },
+    sortFilters: {
+      label: 'Сортировать',
+      type: 'select',
+      selectConfig: {
+        options: summarize ? [
+          { value: 'employee.lastName asc', label: 'По алфавиту' },
+          { value: 'allAmount desc', label: 'От самого большого' },
+          { value: 'allAmount asc', label: 'От самого маленького' },
+        ] : [
+          { value: 'history.dateTime desc', label: 'От недавнего' },
+          { value: 'history.dateTIme asc', label: 'От давнего' }
+        ],
+      },
+      defaultValue: defaultSort,
     },
     fromDateTime: {
       label: 'От',
       type: 'datetime',
+      defaultValue: getStartOfToday(),
     },
     toDateTime: {
       label: 'До',
       type: 'datetime',
+    },
+  };
+
+  const pageActions = {
+    summarize: {
+      title: () => summarize ? 'История' : 'Рассчитать',
+      action: () => {
+        const newSummarize = !summarize;
+
+        setFilters(({ sortColumn, ...rest }) => ({
+          ...rest,
+          sortColumn: newSummarize ? 'allAmount' : 'history.dateTime',
+          sorting: 'desc',
+        }));
+
+        setSummarize(newSummarize);
+      },
+      disabled: false,
     },
   };
 
@@ -218,16 +259,11 @@ const Stats = props => {
     },
   }];
 
-  const onChangeFilters = values => {
-    setShowFilters(false);
-    setFilters(values);
-  };
+  const onChangeFilters = ({ fromDateTime, toDateTime, sortFilters, flagsPresent, flagsAbsent, ...restFilters }) => {
+    const [sortColumn, sorting] = sortFilters?.split(' ') || [];
 
-  const getFilters = () => {
-    const { fromDateTime, toDateTime, ...restFilters } = filters;
-
-    return {
-      ...restFilters,
+    setFilters({
+      ...Object.fromEntries(Object.entries({ ...restFilters, sortColumn, sorting }).filter(([_, val]) => val !== undefined)),
 
       ...(fromDateTime && {
         fromDateTime: fromDateTime.toISOString(),
@@ -240,7 +276,11 @@ const Stats = props => {
       ...(me.role === 'foreman' && {
         foreman: me.id,
       }),
-    };
+
+      ...(Object.fromEntries(flagsPresent.map(flag => ([flag, true])))),
+      ...(Object.fromEntries(flagsAbsent.map(flag => ([flag, false])))),
+    });
+    setShowFilters(false);
   };
 
   return (
@@ -251,19 +291,9 @@ const Stats = props => {
           onSubmit={onChangeFilters}
           submitText="Фильтровать"
           resetable
-          resetText="Сбросить фильтры"
+          resetText="Сбросить фильтры (всё за сегодня)"
           hidden={!showFilters}
         />
-        {/* <View style={styles.mt(10)}>
-          <Button
-            title="Только за сегодня"
-            onPress={() => setFilters(prev => ({
-              ...prev,
-              fromDateTime: getStartOfToday(),
-            }))}
-            color="green"
-          />
-        </View> */}
         {
           !showFilters && (
             <>
@@ -273,11 +303,13 @@ const Stats = props => {
               />
               <PaginatedTable
                 url="/history"
-                columns={columns}
+                columns={summarize ? summarizeCols : columns}
                 tableChips={tableChips}
+                pageActions={pageActions}
                 noSearch
-                customFilters={getFilters()}
-                actions={actions}
+                customFilters={{ ...filters, summarize }}
+                actions={summarize ? null : actions}
+                hiddenButRequiredData={hiddenButRequiredData}
               />
           </>
           )

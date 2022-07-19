@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import styles from '../styles/styles';
 import FetchSelect from './FetchSelect';
 import { Button } from 'react-native';
-import { Button as PaperButton } from 'react-native-paper';
+import { Badge, Button as PaperButton } from 'react-native-paper';
 import { Input } from '@rneui/themed';
 import { useState } from 'react';
 import RNDateTimePicker from '@react-native-community/datetimepicker';
@@ -50,6 +50,28 @@ const renderField = (fieldData, {
         // </FileUploader>
       );
       break;
+    case 'multiple-select':
+      const { multipleSelectConfig: { multipleOptions } } = config;
+
+      fieldToRender = (
+        <DropDownPicker
+          key={`multipleselect${index}`}
+          multiple
+          translation={{ PLACEHOLDER: label, SEARCH_PLACEHOLDER: 'Поиск...', NOTHING_TO_SHOW: 'Нет результатов', SELECTED_ITEMS_COUNT_TEXT: 'Выбрано {count} флагов' }}
+          items={multipleOptions}
+          value={values[field]}
+          style={[styles.mb(5)]}
+          open={open}
+          min={0}
+          max={5}
+          setOpen={setOpen}
+          setValue={prevCb => {
+            setFieldValue(field, prevCb(values[field]));
+          }}
+          listMode="MODAL"
+        />
+      );
+      break;
     case 'select':
       const { selectConfig: { options } } = config;
 
@@ -77,22 +99,7 @@ const renderField = (fieldData, {
           }}
           listMode="MODAL"
         />
-        // <FormControl style={style}>
-        //   <InputLabel>{label}</InputLabel>
-        //   <Select
-        //     value={values[field]}
-        //     name={field}
-        //     label={label}
-        //     onChange={handleChange}
-        //   >
-        //     {
-        //       options.map(({ value, text }, idx) => (
-        //         <MenuItem key={`selectitem${idx}${value}${text}`} value={value}>{text}</MenuItem>
-        //       ))
-        //     }
-        //   </Select>
-        // </FormControl>
-      )
+      );
       break;
     case 'fetch-select':
       const {
@@ -158,12 +165,13 @@ const renderField = (fieldData, {
               />
             )
           }
+          <View style={{ display: 'flex', flexDirection: 'column', flexWrap: 'wrap', height: 100, alignContent: 'space-between', justifyContent: 'center' }}>
           <PaperButton
             onPress={() => { setMode('date'); setOpen(true); }}
             icon="calendar"
             color="black"
             mode="outlined"
-            style={styles.mb(10)}
+            style={[styles.mb(10), { width: '75%' }]}
             key={`date${index}`}
           >
             {values[field]?.toDateString ? values[field]?.toDateString() : label }
@@ -173,10 +181,20 @@ const renderField = (fieldData, {
             icon="clock"
             color="black"
             mode="outlined"
+            style={[{ width: '75%' }]}
             key={`time${index}`}
           >
             {values[field]?.toLocaleTimeString ? values[field]?.toLocaleTimeString() : label}
           </PaperButton>
+          <PaperButton
+            onPress={() => setFieldValue(field, undefined)}
+            color="black"
+            mode="outlined"
+            icon="close"
+            style={[styles.mb(10), { width: '20%' }]}
+            key={`dateclear${index}`}
+          />
+          </View>
         </View>
       );
       break;
@@ -230,7 +248,7 @@ const Form = ({ onSubmit, submitText, fieldsData, submitable, resetable, resetTe
     .map(([field, config], idx) => {
       config.index = idx;
 
-      if (['fetch-select', 'datetime', 'select'].includes(config.type)) {
+      if (['fetch-select', 'datetime', 'select', 'multiple-select'].includes(config.type)) {
         config = {
           ...config,
           open: idx === openedSelect,

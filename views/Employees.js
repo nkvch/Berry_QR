@@ -10,55 +10,34 @@ import { Button, Checkbox } from "react-native-paper";
 
 const url = '/employees';
 
+const employeeFlags = [
+  { value: 'isWorking', text: 'Работает', color: '#fc7303' },
+  { value: 'printedQR', text: 'QR распечатан', color: '#03a5fc' },
+  { value: 'blacklisted', text: 'Черный список', color: '#808080' },
+  { value: 'goodWorker', text: 'Хороший работник', color: '#1e9e05' },
+  { value: 'workedBefore', text: 'Работал прежде', color: '#d9c045' },
+  { value: 'wontWork', text: 'Не будет работать', color: '#BF156C' },
+];
+
 const columns = {
-  id: {
-    name: 'ID',
-    type: 'number',
-    hidden: true,
-  },
-  contract: {
-    name: 'Номер кантракта',
+  lastName: {
+    name: 'Фамилия',
     type: 'text',
-    hidden: true,
-  },
-  foremanId: {
-    type: 'number',
-    hidden: true,
   },
   firstName: {
     name: 'Имя',
     type: 'text',
   },
-  lastName: {
-    name: 'Фамилия',
-    type: 'text',
-  },
-  address: {
-    hidden: true,
-  },
-  pickUpAddress: {
-    hidden: true,
-  },
-  workTomorrow: {
-    hidden: true,
-  },
-  photoPath: {
-    name: 'Фото',
-    type: 'image',
-    hidden: true,
-  },
-  phone: {
-    name: 'Телефон',
-    type: 'text',
-    hidden: true,
-  },
-  foreman: {
-    name: 'Бригадир',
-    type: 'included',
-    parse: foreman => foreman ? `${foreman.firstName} ${foreman.lastName}` : 'Нет данных',
-    hidden: true,
-  },
 };
+
+const hiddenButRequiredData = [
+  'id',
+  'foremanId',
+  'berryId',
+  'phone',
+  'additionalPhone',
+  ...(employeeFlags.map(({ value }) => value)),
+];
 
 const foremanColumns = {
   id: {
@@ -113,15 +92,21 @@ const addFieldsData = {
   },
 };
 
-const chips = {
-  workTomorrow: {
-    show: emp => emp.workTomorrow,
-    label: 'Работает завтра',
+const chips = Object.fromEntries(employeeFlags.map(({ value, text, color }) => ([
+  value,
+  {
+    show: emp => emp[value],
+    label: text,
     style: {
-      backgroundColor: 'rgba(255, 71, 71, 0.5)',
-    }
+      backgroundColor: color,
+      width: text.length * 9,
+      height: 30,
+    },
+    textStyle: {
+      fontSize: 11,
+    },
   },
-};
+])));
 
 const Employees = ({ jumpTo, adding }) => {
   const me = useUser();
@@ -130,10 +115,10 @@ const Employees = ({ jumpTo, adding }) => {
   const [customFilters, setCustomFilters] = useState(initFilters);
 
   const onChangeFilters = values => {
-    const { workTomorrow, foremanId } = values;
+    const { isWorking, foremanId } = values;
     setCustomFilters({
       ...(typeof foremanId === 'number' && { foremanId }),
-      ...(workTomorrow !== 'null' && { workTomorrow }),
+      ...(isWorking !== 'null' && { isWorking }),
     });
   };
 
@@ -165,13 +150,13 @@ const Employees = ({ jumpTo, adding }) => {
           },
         },
       }),
-      workTomorrow: {
+      isWorking: {
         label: 'Фильтровать по смене',
         type: 'select',
         selectConfig: {
           options: [
-            { value: 'true', label: 'Работающие завтра' },
-            { value: 'false', label: 'Не работающие завтра' },
+            { value: 'true', label: 'Работающие' },
+            { value: 'false', label: 'Не работающие' },
             { value: 'null', label: 'Все' },
           ],
         },
@@ -224,7 +209,21 @@ const Employees = ({ jumpTo, adding }) => {
       label: 'Позвонить',
       icon: 'cellphone-basic',
       action: emp => {
-        Linking.openURL(`tel:+${emp.phone}`);
+        if (emp.additionalPhone) {
+          Alert.alert(
+            'Позвонить',
+            'На какой телефон звоним?',
+            [{
+              text: `Основной (+${emp.phone})`,
+              onPress: () => Linking.openURL(`tel:+${emp.phone}`),
+            }, {
+              text: `Дополнительный (+${emp.additionalPhone})`,
+              onPress: () => Linking.openURL(`tel:+${emp.additionalPhone}`),
+            }]
+          );
+        } else {
+          Linking.openURL(`tel:+${emp.phone}`);
+        }
       },
     },
     goToAddress: {
@@ -285,7 +284,7 @@ const Employees = ({ jumpTo, adding }) => {
           method: 'PUT',
           body: {
             ids: selected,
-            workTomorrow: true,
+            isWorking: true,
           },
           callback: (status, response) => {
             Alert.alert(
@@ -313,7 +312,7 @@ const Employees = ({ jumpTo, adding }) => {
           method: 'PUT',
           body: {
             ids: selected,
-            workTomorrow: false,
+            isWorking: false,
           },
           callback: (status, response) => {
             Alert.alert(
@@ -341,6 +340,7 @@ const Employees = ({ jumpTo, adding }) => {
           actions={actions}
           customFilters={customFilters}
           resetCustomFilters={() => setCustomFilters(initFilters)}
+          hiddenButRequiredData={hiddenButRequiredData}
           onAdd={onAdd}
           selectOn="id"
           addable={me.role === 'admin'}

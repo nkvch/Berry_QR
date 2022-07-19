@@ -5,7 +5,7 @@ import useApi from '../utils/hooks/useApi';
 import { Avatar, Dialog } from '@rneui/themed';
 import { TextInput } from 'react-native-paper';
 import { api } from '../api';
-import { ScrollView, RefreshControl, Text, View, TouchableOpacity } from 'react-native';
+import { ScrollView, RefreshControl, Text, View, TouchableOpacity, Vibration } from 'react-native';
 import Form from './Form';
 import styles from '../styles/styles';
 import { Button as NativeButton } from 'react-native';
@@ -15,7 +15,7 @@ import { Button as NativeButton } from 'react-native';
 const debouncer = new Debouncer(500);
 
 const PaginatedTable = props => {
-  const { url, columns, actions, chips, tableChips, noSearch, customFilters,
+  const { url, hiddenButRequiredData, columns, actions, chips, tableChips, noSearch, customFilters,
     customAddButton, filters, classNames, resetCustomFilters, onAdd,
     addFieldsData, adding, setAdding, addable, pageActions, selectOn } = props;
 
@@ -32,7 +32,8 @@ const PaginatedTable = props => {
 
   const selectColumns = Object.entries(columns)
     .filter(([, { type }]) => type !== 'included')
-    .map(([key]) => key);
+    .map(([key]) => key)
+    .concat(hiddenButRequiredData);
 
   const { loading, data, fetchError, refetch, forceLoading } = useApi({ url }, {
     page,
@@ -62,9 +63,9 @@ const PaginatedTable = props => {
     });
   };
 
-  const filterHiddenFields = ([key]) => columns[key].hidden !== true;
+  const filterHiddenFields = ([key]) => !!columns[key];
 
-  const filterHiddenHeaders = ({ hidden }) => hidden !== true;
+  const sortColumns = ([key1], [key2]) => Object.keys(columns).indexOf(key1) - Object.keys(columns).indexOf(key2);
 
   const renderCellContend = (key, value) => {
     switch (columns[key].type) {
@@ -76,6 +77,8 @@ const PaginatedTable = props => {
         return columns[key].parse(value);
       case 'dateTime':
         return `${new Date(value).toDateString().slice(4)}\n${new Date(value).toLocaleTimeString()}`;
+      case 'custom':
+        return columns[key].render(value);
       default:
         return value;
     }
@@ -97,6 +100,10 @@ const PaginatedTable = props => {
     if (selected.length) {
       const isRowSelected = selected.includes(row[selectOn]);
 
+      if (!isRowSelected) {
+        Vibration.vibrate(30);
+      }
+
       setSelected(prev => isRowSelected ? prev.filter(el => el !== row[selectOn]) : [...prev, row[selectOn]]);
     } else {
       setClickedItem(idx);
@@ -105,6 +112,7 @@ const PaginatedTable = props => {
 
   const onLongPressRow = row => {
     if (selectOn) {
+      Vibration.vibrate(100);
       setSelected([row[selectOn]]);
     }
   };
@@ -171,13 +179,13 @@ const PaginatedTable = props => {
         isVisible={Number.isSafeInteger(clickedItem)}
         onPressOut={() => setClickedItem(null)}
       >
-        {renderActions(actions)}
+        {actions ? renderActions(actions) : null}
       </Dialog>
       <DataTable style={{ overflow: 'visible' }}>
         { tableChips && data ? tableChips.map(({ label, style }, idx) => <Chip key={`customchip${idx}`} style={style}>{label(data)}</Chip>) : null }
         <DataTable.Header>
           {
-            Object.values(columns).filter(filterHiddenHeaders).map(({ name }) => (
+            Object.values(columns).map(({ name }) => (
               <DataTable.Title key={name}>{name}</DataTable.Title>
             ))
           }
@@ -185,17 +193,19 @@ const PaginatedTable = props => {
           {rows.map((row, idx) => (
             <>
               {
-                chips ? Object.values(chips).filter(({ show }) => show(row)).map(({ label, style }) => (
-                  <Chip style={style} key={`chip${idx}${label}`}>{label}</Chip>
-                )) : null
+                chips ? <View style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>{Object.values(chips).filter(({ show }) => show(row)).map(({ label, style, textStyle }) => (
+                  <Chip style={style} key={`chip${idx}${label}`}><Text style={textStyle}>{label}</Text></Chip>
+                ))}</View> : null
               }
               <TouchableOpacity
-                onPress={() => onPressRow(row, idx)}
-                onLongPress={() => onLongPressRow(row, idx)}
+                {...(actions && {
+                  onPress: () => onPressRow(row, idx),
+                  onLongPress: () => onLongPressRow(row, idx),
+                })}
               >
                 <DataTable.Row key={idx} style={selected.includes(row[selectOn]) ? { backgroundColor: '#72c3f2', borderRadius: 5 } : null}>
                   {
-                    Object.entries(row).filter(filterHiddenFields).map(([key, value]) => (
+                    Object.entries(row).filter(filterHiddenFields).sort(sortColumns).map(([key, value]) => (
                       <DataTable.Cell key={`${idx}${key}${value}`}>
                         {renderCellContend(key, value)}
                       </DataTable.Cell>
@@ -228,12 +238,12 @@ const PaginatedTable = props => {
         )
       }
       {
-        pageActions && Object.entries(pageActions).map(([name, { icon, title, action, customRender }]) => customRender ? customRender(data) : (
+        pageActions && Object.entries(pageActions).map(([name, { icon, title, action, customRender, disabled }]) => customRender ? customRender(data) : (
           <View style={{ marginBottom: 8 }}>
             <NativeButton
               title={title(selected)}
               onPress={() => action(data, null, refetch, forceLoading, selected, setSelected)}
-              disabled={!selected.length}
+              disabled={disabled ?? !selected.length}
             />
           </View>
         ))
