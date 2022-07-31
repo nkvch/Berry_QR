@@ -15,6 +15,7 @@ const employeeFlags = [
   { value: 'blacklisted', text: 'Черный список', color: '#808080' },
   { value: 'goodWorker', text: 'Хороший работник', color: '#1e9e05' },
   { value: 'workedBefore', text: 'Работал прежде', color: '#d9c045' },
+  { value: 'called', text: 'Звонили', color: '#c75fed' },
 ];
 
 const employeeColumns = {

@@ -10,6 +10,69 @@ import { Button, Checkbox } from "react-native-paper";
 
 const url = '/employees';
 
+const call = emp => {
+  Alert.alert(
+    'Запомнить звонок?',
+    'На этом сотруднике будет отображаться флаг "Уже звонили".',
+    [{
+      text: 'Да',
+      onPress: async () => {
+        await request({
+          url: `/employees/${emp.id}`,
+          method: 'PUT',
+          body: { called: true },
+          callback: (status, response) => {
+            if (status !== 'ok') {
+              const { message } = response;
+
+              Alert.alert(
+                'Ошибка',
+                `Не удалось записать информацию о совершенном звонке: ${message}`,
+                [{ text: 'ОК' }],
+              );
+            } else {
+              if (emp.additionalPhone) {
+                Alert.alert(
+                  'Позвонить',
+                  'На какой телефон звоним?',
+                  [{
+                    text: `Основной (+${emp.phone})`,
+                    onPress: () => Linking.openURL(`tel:+${emp.phone}`),
+                  }, {
+                    text: `Дополнительный (+${emp.additionalPhone})`,
+                    onPress: () => Linking.openURL(`tel:+${emp.additionalPhone}`),
+                  }]
+                );
+              } else {
+                Linking.openURL(`tel:+${emp.phone}`);
+              }
+            }
+          },
+        });
+      }
+    }, {
+      text: 'Нет',
+      onPress: () => {
+        if (emp.additionalPhone) {
+          Alert.alert(
+            'Позвонить',
+            'На какой телефон звоним?',
+            [{
+              text: `Основной (+${emp.phone})`,
+              onPress: () => Linking.openURL(`tel:+${emp.phone}`),
+            }, {
+              text: `Дополнительный (+${emp.additionalPhone})`,
+              onPress: () => Linking.openURL(`tel:+${emp.additionalPhone}`),
+            }]
+          );
+        } else {
+          Linking.openURL(`tel:+${emp.phone}`);
+        }
+      },
+    }]
+  );
+};
+
 const employeeFlags = [
   { value: 'isWorking', text: 'Работает', color: '#fc7303' },
   { value: 'printedQR', text: 'QR распечатан', color: '#03a5fc' },
@@ -17,6 +80,7 @@ const employeeFlags = [
   { value: 'goodWorker', text: 'Хороший работник', color: '#1e9e05' },
   { value: 'workedBefore', text: 'Работал прежде', color: '#d9c045' },
   { value: 'wontWork', text: 'Не будет работать', color: '#BF156C' },
+  { value: 'called', text: 'Звонили', color: '#c75fed' },
 ];
 
 const columns = {
@@ -99,7 +163,7 @@ const chips = Object.fromEntries(employeeFlags.map(({ value, text, color }) => (
     label: text,
     style: {
       backgroundColor: color,
-      width: text.length * 9,
+      width: text.length * 13 * (0.985**(text.length)),
       height: 30,
     },
     textStyle: {
@@ -115,10 +179,12 @@ const Employees = ({ jumpTo, adding }) => {
   const [customFilters, setCustomFilters] = useState(initFilters);
 
   const onChangeFilters = values => {
-    const { isWorking, foremanId } = values;
+    const { isWorking, called, foremanId } = values;
+
     setCustomFilters({
       ...(typeof foremanId === 'number' && { foremanId }),
-      ...(isWorking !== 'null' && { isWorking }),
+      ...(isWorking && (isWorking !== 'null') && { isWorking }),
+      ...(called && (called !== 'null') && { called }),
     });
   };
 
@@ -160,7 +226,17 @@ const Employees = ({ jumpTo, adding }) => {
             { value: 'null', label: 'Все' },
           ],
         },
-        defaultValue: 'null',
+      },
+      called: {
+        label: 'Фильтровать по истории звонков',
+        type: 'select',
+        selectConfig: {
+          options: [
+            { value: 'true', label: 'Уже звонили' },
+            { value: 'false', label: 'Еще не звонили' },
+            { value: 'null', label: 'Все' },
+          ],
+        },
       },
     },
     className: 'inline-form',
@@ -208,23 +284,7 @@ const Employees = ({ jumpTo, adding }) => {
     call: {
       label: 'Позвонить',
       icon: 'cellphone-basic',
-      action: emp => {
-        if (emp.additionalPhone) {
-          Alert.alert(
-            'Позвонить',
-            'На какой телефон звоним?',
-            [{
-              text: `Основной (+${emp.phone})`,
-              onPress: () => Linking.openURL(`tel:+${emp.phone}`),
-            }, {
-              text: `Дополнительный (+${emp.additionalPhone})`,
-              onPress: () => Linking.openURL(`tel:+${emp.additionalPhone}`),
-            }]
-          );
-        } else {
-          Linking.openURL(`tel:+${emp.phone}`);
-        }
-      },
+      action: call,
     },
     goToAddress: {
       label: 'Найти',
@@ -288,7 +348,7 @@ const Employees = ({ jumpTo, adding }) => {
           },
           callback: (status, response) => {
             Alert.alert(
-              'Смена нв завтра',
+              'Смена на завтра',
               status === 'ok' ? 'Информация о смене успешно обновлена' : `Ошибка при обновлении информации о смене: ${response.message}`,
               [{ text: 'OK' }],
             )
