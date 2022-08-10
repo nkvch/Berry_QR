@@ -10,12 +10,12 @@ import parsePrice from "../utils/parsePrice";
 import getStartOfToday from "../utils/getStartOfToday";
 
 const employeeFlags = [
-  { value: 'isWorking', text: 'Работает', color: '#fc7303' },
-  { value: 'printedQR', text: 'QR распечатан', color: '#03a5fc' },
-  { value: 'blacklisted', text: 'Черный список', color: '#808080' },
-  { value: 'goodWorker', text: 'Хороший работник', color: '#1e9e05' },
-  { value: 'workedBefore', text: 'Работал прежде', color: '#d9c045' },
-  { value: 'called', text: 'Звонили', color: '#c75fed' },
+  { value: 'isWorking', text: 'Works', color: '#fc7303' },
+  { value: 'printedQR', text: 'QR printed', color: '#03a5fc' },
+  { value: 'blacklisted', text: 'Blacklisted', color: '#808080' },
+  { value: 'goodWorker', text: 'Good worker', color: '#1e9e05' },
+  { value: 'workedBefore', text: 'Worked before', color: '#d9c045' },
+  { value: 'called', text: 'Called', color: '#c75fed' },
 ];
 
 const employeeColumns = {
@@ -24,15 +24,15 @@ const employeeColumns = {
     type: 'number',
   },
   photoPath: {
-    name: 'Фото',
+    name: 'Photo',
     type: 'image',
   },
   firstName: {
-    name: 'Имя',
+    name: 'First name',
     type: 'text',
   },
   lastName: {
-    name: 'Фамилия',
+    name: 'Last name',
     type: 'text',
   },
 };
@@ -43,11 +43,11 @@ const productColumns = {
     type: 'number',
   },
   photoPath: {
-    name: 'Фото',
+    name: 'Photo',
     type: 'image',
   },
   productName: {
-    name: 'Имя',
+    name: 'First name',
     type: 'text',
   },
 };
@@ -58,28 +58,28 @@ const foremanColumns = {
     type: 'number',
   },
   firstName: {
-    name: 'Имя',
+    name: 'First name',
     type: 'text',
   },
   lastName: {
-    name: 'Фамилия',
+    name: 'Last name',
     type: 'text',
   },
 };
 
 const columns = {
   amount: {
-    name: 'Количество (кг)',
+    name: 'Amount (kg)',
     type: 'number',
   },
   dateTime: {
-    name: 'Дата и время',
+    name: 'Date and time',
     type: 'dateTime',
   },
   employee: {
-    name: 'Сотрудник',
+    name: 'Employee',
     type: 'included',
-    parse: emp => emp ? `${emp.firstName} ${emp.lastName}` : 'Нет данных',
+    parse: emp => emp ? `${emp.firstName} ${emp.lastName}` : 'No data',
   },
 };
 
@@ -87,17 +87,17 @@ const hiddenButRequiredData = ['employeeId', 'productId'];
 
 const summarizeCols = {
   employee: {
-    name: 'Сотрудник',
+    name: 'Employee',
     type: 'included',
-    parse: emp => emp ? `${emp.firstName} ${emp.lastName}` : 'Нет данных',
+    parse: emp => emp ? `${emp.firstName} ${emp.lastName}` : 'No data',
   },
   allAmount: {
-    name: 'Все количество',
+    name: 'All amount',
     type: 'custom',
-    render: num => `${num.toFixed(2)} кг`,
+    render: num => `${num.toFixed(2)} kg`,
   },
   allPrice: {
-    name: 'Вся сумма',
+    name: 'All price',
     type: 'custom',
     render: num => parsePrice(num),
   },
@@ -105,14 +105,14 @@ const summarizeCols = {
 
 const actions = {
   delete: {
-    label: 'Удалить',
+    label: 'Delete',
     icon: 'delete',
     action: (rec, _, refetch, forceLoading, setClickedItem) => {
       Alert.alert(
-        'Удаление записи из истории',
-        `Вы действительно хотите запись ${rec.id} ${rec.employee?.firstName || ''} ${rec.employee?.lastName || ''} ${rec.product?.productName || ''} ${rec.amount}?`,
+        'Deleting record from history',
+        `Are you sure you want to delete record ${rec.id} ${rec.employee?.firstName || ''} ${rec.employee?.lastName || ''} ${rec.product?.productName || ''} ${rec.amount}?`,
         [{
-          text: 'Удалить',
+          text: 'Delete',
           onPress: () => {
             forceLoading(true);
 
@@ -122,7 +122,7 @@ const actions = {
               callback: (status, response) => {
                 if (status === 'ok') {
                   Alert.alert(
-                    'Запись успешно удалена',
+                    'Record was successfully deleted',
                     ''
                     [{ text: 'OK' }],
                   );
@@ -130,7 +130,7 @@ const actions = {
                   refetch();
                 } else {
                   Alert.alert(
-                    'Ошибка при удалении записи',
+                    'Error while deleting record',
                     response.message,
                     [{ text: 'OK' }],
                   );
@@ -140,7 +140,7 @@ const actions = {
           },
           style: 'destructive',
         }, {
-          text: 'Отменить',
+          text: 'Cancel',
           onPress: () => {},
           style: 'cancel',
         }],
@@ -162,7 +162,7 @@ const Stats = props => {
   const initFilters = {
     sortColumn: defaultSortColumn,
     sorting: defaultSorting,
-    fromDateTime: getStartOfToday().toISOString(),
+    // fromDateTime: getStartOfToday().toISOString(),
   };
 
   const [filters, setFilters] = useState(initFilters);
@@ -170,7 +170,7 @@ const Stats = props => {
   const fieldsData = {
     ...(me.role === 'admin' && {
       foreman: {
-        label: 'Бригадир',
+        label: 'Foreman',
         type: 'fetch-select',
         fetchSelectConfig: {
           url: '/foremen',
@@ -182,7 +182,7 @@ const Stats = props => {
       },
     }),
     employee: {
-      label: 'Сотрудник',
+      label: 'Employee',
       type: 'fetch-select',
       fetchSelectConfig: {
         url: '/employees',
@@ -193,7 +193,7 @@ const Stats = props => {
       },
     },
     flagsPresent: {
-      label: 'Фильтровать по наличию флага',
+      label: 'Filter by flags present',
       type: 'multiple-select',
       defaultValue: [],
       multipleSelectConfig: {
@@ -201,7 +201,7 @@ const Stats = props => {
       },
     },
     flagsAbsent: {
-      label: 'Фильтровать по отсутствию флага',
+      label: 'Filter by flags absent',
       type: 'multiple-select',
       defaultValue: [],
       multipleSelectConfig: {
@@ -209,34 +209,34 @@ const Stats = props => {
       },
     },
     sortFilters: {
-      label: 'Сортировать',
+      label: 'Sort',
       type: 'select',
       selectConfig: {
         options: summarize ? [
-          { value: 'employee.lastName asc', label: 'По алфавиту' },
-          { value: 'allAmount desc', label: 'От самого большого' },
-          { value: 'allAmount asc', label: 'От самого маленького' },
+          { value: 'employee.lastName asc', label: 'By alphabet' },
+          { value: 'allAmount desc', label: 'From the most' },
+          { value: 'allAmount asc', label: 'From the least' },
         ] : [
-          { value: 'history.dateTime desc', label: 'От недавнего' },
-          { value: 'history.dateTIme asc', label: 'От давнего' }
+          { value: 'history.dateTime desc', label: 'From newest' },
+          { value: 'history.dateTIme asc', label: 'From oldest' }
         ],
       },
       defaultValue: defaultSort,
     },
     fromDateTime: {
-      label: 'От',
+      label: 'From',
       type: 'datetime',
-      defaultValue: getStartOfToday(),
+      // defaultValue: getStartOfToday(),
     },
     toDateTime: {
-      label: 'До',
+      label: 'To',
       type: 'datetime',
     },
   };
 
   const pageActions = {
     summarize: {
-      title: () => summarize ? 'История' : 'Рассчитать',
+      title: () => summarize ? 'History' : 'Summarize',
       action: () => {
         const newSummarize = !summarize;
 
@@ -253,7 +253,7 @@ const Stats = props => {
   };
 
   const tableChips = [{
-    label: data => data?.totalAmount ? `Итого ${data.totalAmount.allAmount.toFixed(2)} кг или ${parsePrice(data.totalAmount.allPrice)}` : '',
+    label: data => data?.totalAmount ? `Total amount: ${data.totalAmount.allAmount.toFixed(2)} kg or ${parsePrice(data.totalAmount.allPrice)}` : '',
     style: {
       backgroundColor: 'rgba(0, 128, 0, 0.564)',
       marginTop: 8,
@@ -290,16 +290,16 @@ const Stats = props => {
         <Form
           fieldsData={fieldsData}
           onSubmit={onChangeFilters}
-          submitText="Фильтровать"
+          submitText="Filter"
           resetable
-          resetText="Сбросить фильтры (всё за сегодня)"
+          resetText="Clear filters"
           hidden={!showFilters}
         />
         {
           !showFilters && (
             <>
               <Button
-                title="Фильтры"
+                title="Filters"
                 onPress={() => setShowFilters(true)}
               />
               <PaginatedTable

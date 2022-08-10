@@ -43,7 +43,7 @@ const renderField = (fieldData, {
         //   handleChange={file => setFieldValue(field, file)}
         //   label={label}
         //   name={field}
-        //   hoverTitle="Отпускайте"
+        //   hoverTitle="Drop"
         //   types={['JPG', 'PNG', 'GIF']}
         // >
         //   <DroppableImageContainer image={values[field]}/>
@@ -57,7 +57,7 @@ const renderField = (fieldData, {
         <DropDownPicker
           key={`multipleselect${index}`}
           multiple
-          translation={{ PLACEHOLDER: label, SEARCH_PLACEHOLDER: 'Поиск...', NOTHING_TO_SHOW: 'Нет результатов', SELECTED_ITEMS_COUNT_TEXT: 'Выбрано {count} флагов' }}
+          translation={{ PLACEHOLDER: label, SEARCH_PLACEHOLDER: 'Search...', NOTHING_TO_SHOW: 'No results', SELECTED_ITEMS_COUNT_TEXT: '{count} flags picked' }}
           items={multipleOptions}
           value={values[field]}
           style={[styles.mb(5)]}
@@ -78,7 +78,7 @@ const renderField = (fieldData, {
       fieldToRender = (
         <DropDownPicker
           key={`select${index}`}
-          translation={{ PLACEHOLDER: label, SEARCH_PLACEHOLDER: 'Поиск...', NOTHING_TO_SHOW: 'Нет результатов' }}
+          translation={{ PLACEHOLDER: label, SEARCH_PLACEHOLDER: 'Search...', NOTHING_TO_SHOW: 'No results' }}
           items={options}
           value={values[field]}
           style={[styles.mb(5)]}
@@ -294,7 +294,7 @@ const Form = ({ onSubmit, submitText, fieldsData, submitable, resetable, resetTe
                   <View style={styles.mt(10)}>
                     <Button
                       key={`resetbutton`}
-                      title={intable ? 'Сбросить' : resetText}
+                      title={intable ? 'Clear' : resetText}
                       onPress={() => {
                         resetForm();
 

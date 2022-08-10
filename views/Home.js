@@ -6,8 +6,8 @@ import { Button } from 'react-native';
 import { Card } from 'react-native-paper';
 
 const getMyRoleName = {
-  foreman: 'Бригадир',
-  admin: 'Администратор',
+  foreman: 'Foreman',
+  admin: 'Admin',
 };
 
 const Home = props => {
@@ -20,7 +20,7 @@ const Home = props => {
           <Card.Title title={`${user?.firstName} ${user?.lastName}`} subtitle={getMyRoleName[user?.role?.roleName]} />
           <Card.Actions>
             <Button
-              title="Выйти"
+              title="Log out"
               onPress={logout}
             />
           </Card.Actions>

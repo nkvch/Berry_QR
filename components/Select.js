@@ -7,7 +7,7 @@ const Select = props => {
   return (
     <DropDownPicker
       key={index}
-      translation={{ PLACEHOLDER: label, SEARCH_PLACEHOLDER: 'Поиск...', NOTHING_TO_SHOW: 'Нет результатов' }}
+      translation={{ PLACEHOLDER: label, SEARCH_PLACEHOLDER: 'Search...', NOTHING_TO_SHOW: 'No results' }}
       items={options}
       value={value}
       open={open}

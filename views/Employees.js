@@ -12,10 +12,10 @@ const url = '/employees';
 
 const call = emp => {
   Alert.alert(
-    'Запомнить звонок?',
-    'На этом сотруднике будет отображаться флаг "Уже звонили".',
+    'Save call to history?',
+    'This employee will be flagged as "Called".',
     [{
-      text: 'Да',
+      text: 'Yes',
       onPress: async () => {
         await request({
           url: `/employees/${emp.id}`,
@@ -26,70 +26,40 @@ const call = emp => {
               const { message } = response;
 
               Alert.alert(
-                'Ошибка',
-                `Не удалось записать информацию о совершенном звонке: ${message}`,
+                'Error',
+                `Failed saving call to history: ${message}`,
                 [{ text: 'ОК' }],
               );
             } else {
-              if (emp.additionalPhone) {
-                Alert.alert(
-                  'Позвонить',
-                  'На какой телефон звоним?',
-                  [{
-                    text: `Основной (+${emp.phone})`,
-                    onPress: () => Linking.openURL(`tel:+${emp.phone}`),
-                  }, {
-                    text: `Дополнительный (+${emp.additionalPhone})`,
-                    onPress: () => Linking.openURL(`tel:+${emp.additionalPhone}`),
-                  }]
-                );
-              } else {
-                Linking.openURL(`tel:+${emp.phone}`);
-              }
+               Linking.openURL(`tel:+${emp.phone}`);
             }
           },
         });
       }
     }, {
-      text: 'Нет',
-      onPress: () => {
-        if (emp.additionalPhone) {
-          Alert.alert(
-            'Позвонить',
-            'На какой телефон звоним?',
-            [{
-              text: `Основной (+${emp.phone})`,
-              onPress: () => Linking.openURL(`tel:+${emp.phone}`),
-            }, {
-              text: `Дополнительный (+${emp.additionalPhone})`,
-              onPress: () => Linking.openURL(`tel:+${emp.additionalPhone}`),
-            }]
-          );
-        } else {
-          Linking.openURL(`tel:+${emp.phone}`);
-        }
-      },
+      text: 'No',
+      onPress: () => Linking.openURL(`tel:+${emp.phone}`),
     }]
   );
 };
 
 const employeeFlags = [
-  { value: 'isWorking', text: 'Работает', color: '#fc7303' },
-  { value: 'printedQR', text: 'QR распечатан', color: '#03a5fc' },
-  { value: 'blacklisted', text: 'Черный список', color: '#808080' },
-  { value: 'goodWorker', text: 'Хороший работник', color: '#1e9e05' },
-  { value: 'workedBefore', text: 'Работал прежде', color: '#d9c045' },
-  { value: 'wontWork', text: 'Не будет работать', color: '#BF156C' },
-  { value: 'called', text: 'Звонили', color: '#c75fed' },
+  { value: 'isWorking', text: 'Works', color: '#fc7303' },
+  { value: 'printedQR', text: 'QR printed', color: '#03a5fc' },
+  { value: 'blacklisted', text: 'Blacklisted', color: '#808080' },
+  { value: 'goodWorker', text: 'Good worker', color: '#1e9e05' },
+  { value: 'workedBefore', text: 'Worked before', color: '#d9c045' },
+  { value: 'wontWork', text: 'Doesn\'t work', color: '#BF156C' },
+  { value: 'called', text: 'Called', color: '#c75fed' },
 ];
 
 const columns = {
   lastName: {
-    name: 'Фамилия',
+    name: 'Last name',
     type: 'text',
   },
   firstName: {
-    name: 'Имя',
+    name: 'First name',
     type: 'text',
   },
 };
@@ -99,7 +69,6 @@ const hiddenButRequiredData = [
   'foremanId',
   'berryId',
   'phone',
-  'additionalPhone',
   ...(employeeFlags.map(({ value }) => value)),
 ];
 
@@ -109,38 +78,38 @@ const foremanColumns = {
     type: 'number',
   },
   firstName: {
-    name: 'Имя',
+    name: 'First name',
     type: 'text',
   },
   lastName: {
-    name: 'Фамилия',
+    name: 'Last name',
     type: 'text',
   },
 };
 
 const addFieldsData = {
   firstName: {
-    label: 'Имя сотрудника',
+    label: 'First name',
     type: 'text',
   },
   lastName: {
-    label: 'Фамилия сотрудника',
+    label: 'Last name',
     type: 'text',
   },
   contract: {
-    label: 'Нумар кантракту',
+    label: 'Contract #',
     type: 'text',
   },
   address: {
-    label: 'Адрас',
+    label: 'Address',
     type: 'text',
   },
   phone: {
-    label: 'Тэлефон',
+    label: 'Phone',
     type: 'phone',
   },
   foremanId: {
-    label: 'Выберите бригадира',
+    label: 'Choose foreman',
     type: 'fetch-select',
     fetchSelectConfig: {
       url: '/foremen',
@@ -151,7 +120,7 @@ const addFieldsData = {
     }
   },
   photo: {
-    label: 'Выберите или перетащите сюда фотографию',
+    label: 'Choose image',
     type: 'file',
   },
 };
@@ -192,7 +161,7 @@ const Employees = ({ jumpTo, adding }) => {
     fieldsData: {
       ...(me.role === 'admin' && {
         foremanId: {
-          label: 'Фильтровать по бригаде',
+          label: 'Filter by brigade (foreman)',
           type: 'fetch-select',
           fetchSelectConfig: {
             url: '/foremen',
@@ -202,11 +171,11 @@ const Employees = ({ jumpTo, adding }) => {
                 type: 'number',
               },
               firstName: {
-                name: 'Имя',
+                name: 'First name',
                 type: 'text',
               },
               lastName: {
-                name: 'Фамилия',
+                name: 'Last name',
                 type: 'text',
               },
             },
@@ -217,24 +186,24 @@ const Employees = ({ jumpTo, adding }) => {
         },
       }),
       isWorking: {
-        label: 'Фильтровать по смене',
+        label: 'Filter by "Works"',
         type: 'select',
         selectConfig: {
           options: [
-            { value: 'true', label: 'Работающие' },
-            { value: 'false', label: 'Не работающие' },
-            { value: 'null', label: 'Все' },
+            { value: 'true', label: 'Working' },
+            { value: 'false', label: 'Not working' },
+            { value: 'null', label: 'All' },
           ],
         },
       },
       called: {
-        label: 'Фильтровать по истории звонков',
+        label: 'Filter by call history',
         type: 'select',
         selectConfig: {
           options: [
-            { value: 'true', label: 'Уже звонили' },
-            { value: 'false', label: 'Еще не звонили' },
-            { value: 'null', label: 'Все' },
+            { value: 'true', label: 'Called' },
+            { value: 'false', label: 'Not called yet' },
+            { value: 'null', label: 'All' },
           ],
         },
       },
@@ -261,8 +230,8 @@ const Employees = ({ jumpTo, adding }) => {
           const { firstName, lastName } = response.data;
 
           Alert.alert(
-            'Добавление сотруденика',
-            `Сотрудник ${firstName} ${lastName} успешно добавлен`,
+            'Adding employee',
+            `Employee ${firstName} ${lastName} was successfully added`,
             [{ text: 'ОК' }],
           );
 
@@ -271,8 +240,8 @@ const Employees = ({ jumpTo, adding }) => {
           const { message } = response;
 
           Alert.alert(
-            'Добавление сотруденика',
-            `Ошибка: ${message}`,
+            'Adding employee',
+            `Error: ${message}`,
             [{ text: 'ОК' }],
           )
         }
@@ -282,21 +251,21 @@ const Employees = ({ jumpTo, adding }) => {
 
   const actions = {
     call: {
-      label: 'Позвонить',
+      label: 'Call',
       icon: 'cellphone-basic',
       action: call,
     },
     goToAddress: {
-      label: 'Найти',
+      label: 'Find',
       icon: 'map-marker',
       action: emp => {
         const buttons = [{
-          text: 'Отмена',
+          text: 'Cancel',
         }];
   
         if (emp.address) {
           buttons.unshift({
-            text: 'Адрес проживания',
+            text: 'Street address',
             onPress: () => {
               const urlMap = Platform.select({
                 ios: `maps:0,0?q=${emp.address}`,
@@ -310,7 +279,7 @@ const Employees = ({ jumpTo, adding }) => {
   
         if (emp.pickUpAddress) {
           buttons.unshift({
-            text: 'Адрес посадки',
+            text: 'Pick up address',
             onPress: () => {
               const urlMap = Platform.select({
                 ios: `maps:0,0?q=${emp.pickUpAddress}`,
@@ -323,8 +292,8 @@ const Employees = ({ jumpTo, adding }) => {
         }
   
         Alert.alert(
-          'Адрес сотрудника',
-          `Адрес проживания: ${emp.address || 'Нет данных'}.\nАдрес посадки: ${emp.pickUpAddress || 'Нет данных'}.\nОткрыть в картах:\n`,
+          'Employee\'s address',
+          `Living address: ${emp.address || 'No data'}.\nPick up address: ${emp.pickUpAddress || 'No data'}.\nOpen in Maps:\n`,
           buttons,
         );
       },
@@ -335,7 +304,7 @@ const Employees = ({ jumpTo, adding }) => {
   const pageActions = {
     workTommorow: {
       // icon: <Work />,
-      title: selected => `Поставить смену (${selected.length} сотрудников)`,
+      title: selected => `Work (${selected.length} employees)`,
       action: (_, __, refetch, forceLoading, selected, setSelected) => {
         forceLoading(true);
 
@@ -348,8 +317,8 @@ const Employees = ({ jumpTo, adding }) => {
           },
           callback: (status, response) => {
             Alert.alert(
-              'Смена на завтра',
-              status === 'ok' ? 'Информация о смене успешно обновлена' : `Ошибка при обновлении информации о смене: ${response.message}`,
+              'Working employees',
+              status === 'ok' ? 'Data of working employees was successfully updated' : `Error while updating data of working employees: ${response.message}`,
               [{ text: 'OK' }],
             )
             refetch();
@@ -363,7 +332,7 @@ const Employees = ({ jumpTo, adding }) => {
     },
     dontWorkTommorow: {
       // icon: <WorkOff />,
-      title: selected => `Убрать смену (${selected.length} сотрудников)`,
+      title: selected => `Don't work (${selected.length} employees)`,
       action: (_, __, refetch, forceLoading, selected, setSelected) => {
         forceLoading(true);
 
@@ -376,8 +345,8 @@ const Employees = ({ jumpTo, adding }) => {
           },
           callback: (status, response) => {
             Alert.alert(
-              'Смена нв завтра',
-              status === 'ok' ? 'Информация о смене успешно обновлена' : `Ошибка при обновлении информации о смене: ${response.message}`,
+              'Working employees',
+              status === 'ok' ? 'Data of working employees was successfully updated' : `Error while updating data of working employees: ${response.message}`,
               [{ text: 'OK' }],
             )
             refetch();

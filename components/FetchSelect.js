@@ -50,7 +50,7 @@ const FetchSelect = props => {
     <DropDownPicker
       onOpen={() => setSearch('')}
       key={index}
-      translation={{ PLACEHOLDER: label, SEARCH_PLACEHOLDER: 'Поиск...', NOTHING_TO_SHOW: 'Нет результатов' }}
+      translation={{ PLACEHOLDER: label, SEARCH_PLACEHOLDER: 'Search...', NOTHING_TO_SHOW: 'No results' }}
       items={items}
       value={value}
       open={open}

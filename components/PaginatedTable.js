@@ -125,13 +125,13 @@ const PaginatedTable = props => {
     <ScrollView>
       <Form
         onSubmit={onAdd}
-        submitText="Сохранить"
+        submitText="Save"
         fieldsData={addFieldsData}
         className="wide"
       />
       <View style={styles.mt(10)}>
         <NativeButton
-          title="Отменить"
+          title="Cancel"
           onPress={() => setAdding(false)}
         />
       </View>
@@ -150,7 +150,7 @@ const PaginatedTable = props => {
         !noSearch && (
           <TextInput
             key="tablesearch"
-            label="Поиск..."
+            label="Search..."
             onChangeText={handleChangeSearch}
             mode="outline"
             selectionColor="black"
@@ -220,7 +220,7 @@ const PaginatedTable = props => {
           numberOfPages={totallyPages}
           itemsPerPage={qty}
           page={page - 1}
-          optionsLabel={'Результатов на странице'}
+          optionsLabel={'Rows per page'}
           label={`${page}-${totallyPages}`}
           onPageChange={handleChangePage}
           onItemsPerPageChange={handleChangeRowsPerPage}
@@ -231,7 +231,7 @@ const PaginatedTable = props => {
         addable && adding !== undefined && (
           <View style={{ marginBottom: 8 }}>
             <NativeButton
-              title="Добавить"
+              title="Add"
               onPress={() => setAdding(true)}
             />
           </View>
@@ -252,7 +252,7 @@ const PaginatedTable = props => {
         selected.length ? (
           <View style={{ marginBottom: 8 }}>
             <NativeButton
-              title={'Отменить выделенные'}
+              title={'Clear chosen'}
               onPress={() => setSelected([])}
             />
           </View>

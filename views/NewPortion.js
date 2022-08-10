@@ -16,15 +16,15 @@ const employeeColumns = {
     type: 'number',
   },
   photoPath: {
-    name: 'Фото',
+    name: 'Photo',
     type: 'image',
   },
   firstName: {
-    name: 'Имя',
+    name: 'First name',
     type: 'text',
   },
   lastName: {
-    name: 'Имя',
+    name: 'Last name',
     type: 'text',
   },
 };
@@ -35,11 +35,11 @@ const productColumns = {
     type: 'number',
   },
   photoPath: {
-    name: 'Фото',
+    name: 'Photo',
     type: 'image',
   },
   productName: {
-    name: 'Имя',
+    name: 'Product name',
     type: 'text',
   },
 };
@@ -53,7 +53,7 @@ const NewPortion = ({
 
   const getFieldsData = data => ({
     employeeId: {
-      label: 'Выберите сотрудника',
+      label: 'Choose employee',
       type: 'fetch-select',
       fetchSelectConfig: {
         url: '/employees',
@@ -70,7 +70,7 @@ const NewPortion = ({
       defaultValue: data?.employeeId,
     },
     productId: {
-      label: 'Выберите продукт',
+      label: 'Choose product',
       type: 'fetch-select',
       fetchSelectConfig: {
         url: '/products',
@@ -81,11 +81,11 @@ const NewPortion = ({
       }
     },
     amount: {
-      label: 'Количество продукта (кг)',
+      label: 'Product amount (kg)',
       type: 'number',
     },
     dateTime: {
-      label: 'Дата и время',
+      label: 'Date and time',
       type: 'datetime',
       defaultValue: new Date(),
     }
@@ -107,13 +107,13 @@ const NewPortion = ({
           const { amount, dateTime, employeeId, productId } = response.data;
 
           Alert.alert(
-            'Новая запись',
-            `Данные о сборе ${amount} кг продукта с ID ${productId} сотрудником с ID ${employeeId} в ${dateTime} успешно записаны.`,
+            'New record',
+            `Data of portion ${amount} kg of product with ID ${productId} by employee with ID ${employeeId} at ${dateTime} was saved successfully.`,
             [{ text: 'ОК' }],
           );
         } else if (status === 'error') {
           Alert.alert(
-            'Ошибка',
+            'Error',
             response.message,
             [{ text: 'ОК' }],
           );
@@ -131,7 +131,7 @@ const NewPortion = ({
             <Form
               fieldsData={getFieldsData({ employeeId: id })}
               onSubmit={onSubmit}
-              submitText="Сохранить"
+              submitText="Save"
             />
           )
         }

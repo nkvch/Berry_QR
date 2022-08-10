@@ -14,15 +14,15 @@ import request from '../utils/request';
 import AsyncStorageLib from '@react-native-async-storage/async-storage';
 
 const unauthMenuOptions = [
-  { key: 'signin', title: 'Войти', icon: 'exit-to-app' },
+  { key: 'signin', title: 'Sign in', icon: 'exit-to-app' },
 ];
 
 const authMenuOptions = [
-  { key: 'scanner', title: 'Сканнер', icon: 'qrcode-scan' },
-  { key: 'newportion', title: 'Новая порция', icon: 'plus'},
-  { key: 'employees', title: 'Сотрудники', icon: 'account-multiple' },
-  { key: 'stats', title: 'Статистика', icon: 'chart-bar' },
-  { key: 'home', title: 'Домой', icon: 'home' },
+  { key: 'scanner', title: 'Scanner', icon: 'qrcode-scan' },
+  { key: 'newportion', title: 'New portion', icon: 'plus'},
+  { key: 'employees', title: 'Employees', icon: 'account-multiple' },
+  { key: 'stats', title: 'Statistics', icon: 'chart-bar' },
+  { key: 'home', title: 'Home', icon: 'home' },
 ];
 
 const ContextWrapper = ({ children }) => {

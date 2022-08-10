@@ -11,11 +11,11 @@ import Form from '../components/Form';
 
 const fieldsData = {
   username: {
-    label: 'Имя пользователя',
+    label: 'Username',
     type: 'text',
   },
   password: {
-    label: 'Пароль',
+    label: 'Password',
     type: 'password',
   },
 };
@@ -44,7 +44,7 @@ const SignIn = () => {
       <View style={styles.block}>
         <Form
           onSubmit={onSubmit}
-          submitText="Войти"
+          submitText="Sign in"
           fieldsData={fieldsData}
         />
       </View>

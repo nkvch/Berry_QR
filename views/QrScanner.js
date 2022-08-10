@@ -33,7 +33,7 @@ function QrScanner({ jumpTo, isActive }) {
     <View style={styles.main}>
       <View style={styles.block}>
         { hasPermission === null && <Dialog.Loading /> }
-        { hasPermission === false && <Text>{'Телефон не разрешил нам попользоваться камерой :( '}</Text> }
+        { hasPermission === false && <Text>{'Your phone denied access to camera :( '}</Text> }
         {
           hasPermission && !scanned && (
             <BarCodeScanner
@@ -43,7 +43,7 @@ function QrScanner({ jumpTo, isActive }) {
             />
           )
         }
-        {hasPermission && scanned && <Button title={'Сканировать еще раз'} onPress={() => setScanned(false)} />}
+        {hasPermission && scanned && <Button title={'Scan one more'} onPress={() => setScanned(false)} />}
       </View>
     </View>
   );

@@ -5,7 +5,7 @@ const parsePrice = priceNum => {
 
   const strTruncatedNumber = priceNum.toFixed(2);
   const [$, cents] = strTruncatedNumber.split('.');
-  const formatStr = `${$} руб. ${cents} коп.`;
+  const formatStr = `${$} zł. ${cents} gr.`;
 
   return formatStr;
 };

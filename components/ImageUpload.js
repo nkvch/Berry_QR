@@ -45,7 +45,7 @@ const ImageUpload = ({ onChange, value }) => {
         mode="outlined"
         style={styles.mb(10)}
       >
-        { uploaded ? 'Загрузить другое фото' : 'Загрузить фото' }
+        { uploaded ? 'Upload another image' : 'Upload image' }
       </PaperButton>
       <PaperButton
         onPress={onPress('camera')}
@@ -54,7 +54,7 @@ const ImageUpload = ({ onChange, value }) => {
         mode="outlined"
         style={styles.mb(10)}
       >
-        {'Сфотографировать'}
+        {'Take a photo'}
       </PaperButton>
     </View>
   )

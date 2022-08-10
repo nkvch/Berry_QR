@@ -1,1 +1,1 @@
-export const api = 'http://farmer.berrymore.by';
+export const api = 'http://farmapp.nkvch.me';
